@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -7,8 +7,11 @@ import type { DiagnosticoData } from "@/contexts/DiagnosticoContext";
 import {
   Brain, TrendingUp, Shield, Zap, ArrowLeft, Download,
   CheckCircle2, AlertTriangle, Target, BarChart3, Bot,
-  Lightbulb, Clock, DollarSign, Users, Layers
+  Lightbulb, Clock, DollarSign, Users, Layers, Mail, FileDown
 } from "lucide-react";
+import emailjs from "@emailjs/browser";
+import { toast } from "sonner";
+import jsPDF from "jspdf";
 
 interface Recomendacao {
   titulo: string;
@@ -337,6 +340,124 @@ export default function Resultado() {
 
   const scoreGeral = Math.round(scores.reduce((acc, s) => acc + s.score, 0) / scores.length);
 
+  // ===== EXPORTAR PDF =====
+  const handleExportPDF = () => {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    let y = 20;
+
+    // Header
+    doc.setFontSize(8);
+    doc.setTextColor(161, 0, 255);
+    doc.text("> NexxusHuman-AI", 14, y);
+    doc.setTextColor(150);
+    doc.text("Diagn\u00f3stico de IA Empresarial", pageWidth - 14, y, { align: "right" });
+    y += 15;
+
+    // T\u00edtulo
+    doc.setFontSize(18);
+    doc.setTextColor(30);
+    doc.text(`Relat\u00f3rio de Diagn\u00f3stico \u2014 ${data.empresa.nome}`, 14, y);
+    y += 8;
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.text(`${data.empresa.setor} \u00b7 ${data.empresa.porte}`, 14, y);
+    y += 12;
+
+    // Score Geral
+    doc.setFontSize(14);
+    doc.setTextColor(30);
+    doc.text(`Score Geral de Prontid\u00e3o: ${scoreGeral}/100`, 14, y);
+    y += 12;
+
+    // Scores por categoria
+    doc.setFontSize(11);
+    doc.setTextColor(60);
+    scores.forEach((cat) => {
+      doc.text(`\u2022 ${cat.nome}: ${cat.score}/100`, 18, y);
+      y += 7;
+    });
+    y += 8;
+
+    // Recomenda\u00e7\u00f5es
+    doc.setFontSize(14);
+    doc.setTextColor(30);
+    doc.text("Recomenda\u00e7\u00f5es Priorizadas", 14, y);
+    y += 10;
+
+    doc.setFontSize(9);
+    recomendacoes.forEach((rec, i) => {
+      if (y > 260) { doc.addPage(); y = 20; }
+      doc.setTextColor(161, 0, 255);
+      doc.text(`#${i + 1}`, 14, y);
+      doc.setTextColor(30);
+      doc.text(rec.titulo, 22, y);
+      y += 5;
+      doc.setTextColor(100);
+      const lines = doc.splitTextToSize(rec.descricao, pageWidth - 36);
+      doc.text(lines, 22, y);
+      y += lines.length * 4 + 3;
+      doc.setTextColor(80);
+      doc.text(`Impacto: ${rec.impacto} | Risco: ${rec.risco} | Prazo: ${rec.prazo} | ROI: ${rec.roi}`, 22, y);
+      y += 9;
+    });
+
+    // Roadmap
+    if (y > 240) { doc.addPage(); y = 20; }
+    y += 5;
+    doc.setFontSize(14);
+    doc.setTextColor(30);
+    doc.text("Roadmap de Implementa\u00e7\u00e3o", 14, y);
+    y += 10;
+    doc.setFontSize(9);
+    doc.setTextColor(60);
+    ["1. Quick Win (Semana 1-2)", "2. Funda\u00e7\u00e3o (M\u00eas 1)", "3. Expans\u00e3o (M\u00eas 2-3)", "4. Otimiza\u00e7\u00e3o (M\u00eas 4+)"].forEach((step) => {
+      doc.text(step, 18, y);
+      y += 6;
+    });
+
+    // Footer
+    y += 10;
+    doc.setFontSize(8);
+    doc.setTextColor(150);
+    doc.text("\u00a9 2026 NexxusHuman-AI. Diagn\u00f3stico estrat\u00e9gico para implementa\u00e7\u00e3o de agentes de IA.", 14, y);
+
+    doc.save(`diagnostico-ia-${data.empresa.nome.replace(/\s+/g, "-").toLowerCase()}.pdf`);
+    toast.success("PDF exportado com sucesso!");
+  };
+
+  // ===== ENVIAR POR EMAIL =====
+  const handleSendEmail = () => {
+    const email = prompt("Digite o e-mail para enviar o relat\u00f3rio:");
+    if (!email) return;
+
+    // Monta o conte\u00fado do e-mail
+    const templateParams = {
+      to_email: email,
+      empresa_nome: data.empresa.nome,
+      empresa_setor: data.empresa.setor,
+      score_geral: scoreGeral.toString(),
+      scores_detalhes: scores.map(s => `${s.nome}: ${s.score}/100`).join("\n"),
+      recomendacoes_resumo: recomendacoes.slice(0, 5).map((r, i) => `${i+1}. ${r.titulo} (Impacto ${r.impacto}, ROI ${r.roi})`).join("\n"),
+      from_name: "NexxusHuman-AI Diagn\u00f3stico",
+    };
+
+    // Tenta enviar via EmailJS (configure as credenciais)
+    const EMAILJS_SERVICE = "service_nexxus";
+    const EMAILJS_TEMPLATE = "template_diagnostico";
+    const EMAILJS_KEY = "YOUR_PUBLIC_KEY";
+
+    if (EMAILJS_KEY !== "YOUR_PUBLIC_KEY") {
+      emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, templateParams, EMAILJS_KEY)
+        .then(() => toast.success(`Relat\u00f3rio enviado para ${email}!`))
+        .catch(() => toast.error("Erro ao enviar. Tente novamente."));
+    } else {
+      // Modo demo
+      console.log("\ud83d\udce7 Email params (demo):", templateParams);
+      toast.success(`Relat\u00f3rio enviado para ${email}! (modo demo)`);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -579,17 +700,35 @@ export default function Resultado() {
             </div>
           </motion.div>
 
-          {/* CTA Final */}
+          {/* Ações: PDF + Email + Refazer */}
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.7 }}
-            className="mt-10 text-center"
+            className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4"
           >
             <Button
               size="lg"
-              onClick={() => navigate("/diagnostico")}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground font-display font-semibold px-8 py-6 gap-2 transition-all duration-200 active:scale-[0.97]"
+              onClick={handleExportPDF}
+              className="bg-[#A100FF] hover:bg-[#8800DD] text-white font-semibold px-8 py-6 gap-2 transition-all duration-200 active:scale-[0.97]"
+            >
+              <FileDown className="w-4 h-4" />
+              Exportar PDF
+            </Button>
+            <Button
+              size="lg"
+              variant="outline"
+              onClick={handleSendEmail}
+              className="font-semibold px-8 py-6 gap-2 transition-all duration-200 active:scale-[0.97]"
+            >
+              <Mail className="w-4 h-4" />
+              Enviar por E-mail
+            </Button>
+            <Button
+              size="lg"
+              variant="outline"
+              onClick={() => navigate("/diagnostico/iniciar")}
+              className="font-semibold px-8 py-6 gap-2 transition-all duration-200 active:scale-[0.97]"
             >
               <ArrowLeft className="w-4 h-4" />
               Refazer Diagnóstico
