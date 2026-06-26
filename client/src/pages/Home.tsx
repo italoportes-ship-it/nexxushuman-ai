@@ -24,7 +24,7 @@ function Navbar() {
 
           {/* Desktop nav */}
           <nav className="hidden md:flex items-center gap-8">
-            <a href="#services" className="text-[15px] text-white/80 hover:text-white transition-colors font-medium">{t("nav.whatWeDo")}</a>
+            <Link href="/produtos" className="text-[15px] text-white/80 hover:text-white transition-colors font-medium">{lang === "pt" ? "Produtos" : "Products"}</Link>
             <Link href="/diagnostico" className="text-[15px] text-[#A100FF] hover:text-white transition-colors font-semibold">{lang === "pt" ? "Diagn\u00f3stico IA" : "AI Diagnostic"}</Link>
             <Link href="/cases" className="text-[15px] text-white/80 hover:text-white transition-colors font-medium">{t("nav.cases")}</Link>
             <Link href="/blog" className="text-[15px] text-white/80 hover:text-white transition-colors font-medium">Blog</Link>
