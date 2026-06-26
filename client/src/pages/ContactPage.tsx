@@ -1,31 +1,65 @@
-/* ===== Página de Contato com formulário funcional ===== */
-import { useState } from "react";
+/* ===== Página de Contato com integração EmailJS =====
+ * Para configurar o envio real de e-mails:
+ * 1. Crie uma conta gratuita em https://www.emailjs.com
+ * 2. Crie um Service (Gmail, Outlook, etc.)
+ * 3. Crie um Template com variáveis: {{from_name}}, {{from_email}}, {{company}}, {{role}}, {{message}}
+ * 4. Substitua as constantes EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID e EMAILJS_PUBLIC_KEY abaixo
+ * ===================================================== */
+
+import { useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link } from "wouter";
 import { toast } from "sonner";
+import emailjs from "@emailjs/browser";
+
+// ===== CONFIGURAÇÃO EMAILJS =====
+// Substitua pelos seus IDs reais do EmailJS
+const EMAILJS_SERVICE_ID = "service_nexxus"; // Seu Service ID
+const EMAILJS_TEMPLATE_ID = "template_contact"; // Seu Template ID
+const EMAILJS_PUBLIC_KEY = "YOUR_PUBLIC_KEY"; // Sua Public Key
+// =================================
 
 export default function ContactPage() {
   const { t, lang, setLang } = useLanguage();
+  const formRef = useRef<HTMLFormElement>(null);
+  const [sending, setSending] = useState(false);
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
+    from_name: "",
+    from_email: "",
     company: "",
     role: "",
     message: "",
   });
-  const [sending, setSending] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSending(true);
 
-    // Simula envio (em produção, conectar a um backend/API de e-mail)
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    try {
+      // Tenta enviar via EmailJS
+      if (EMAILJS_PUBLIC_KEY !== "YOUR_PUBLIC_KEY" && formRef.current) {
+        await emailjs.sendForm(
+          EMAILJS_SERVICE_ID,
+          EMAILJS_TEMPLATE_ID,
+          formRef.current,
+          EMAILJS_PUBLIC_KEY
+        );
+        toast.success(t("contact.success"));
+      } else {
+        // Modo demo: simula envio quando EmailJS não está configurado
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+        toast.success(t("contact.success"));
+        console.log("📧 Form data (demo mode - configure EmailJS for real emails):", formData);
+      }
 
-    toast.success(t("contact.success"));
-    setFormData({ name: "", email: "", company: "", role: "", message: "" });
-    setSending(false);
+      setFormData({ from_name: "", from_email: "", company: "", role: "", message: "" });
+    } catch (error) {
+      toast.error(lang === "pt" ? "Erro ao enviar. Tente novamente." : "Error sending. Please try again.");
+      console.error("EmailJS error:", error);
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -49,7 +83,7 @@ export default function ContactPage() {
           </Link>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
-            {/* Left: Info */}
+            {/* Coluna esquerda: Informações */}
             <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
               <span className="text-[11px] font-bold tracking-[0.2em] uppercase text-[#A100FF] block mb-4">
                 {t("contact.title")}
@@ -64,7 +98,9 @@ export default function ContactPage() {
               <div className="space-y-6">
                 <div className="border-t border-white/10 pt-4">
                   <span className="text-[11px] font-bold tracking-[0.15em] uppercase text-white/40 block mb-1">Email</span>
-                  <span className="text-white">contato@nexxushuman-ai.com</span>
+                  <a href="mailto:contato@nexxushuman-ai.com" className="text-white hover:text-[#A100FF] transition-colors">
+                    contato@nexxushuman-ai.com
+                  </a>
                 </div>
                 <div className="border-t border-white/10 pt-4">
                   <span className="text-[11px] font-bold tracking-[0.15em] uppercase text-white/40 block mb-1">
@@ -74,23 +110,43 @@ export default function ContactPage() {
                 </div>
                 <div className="border-t border-white/10 pt-4">
                   <span className="text-[11px] font-bold tracking-[0.15em] uppercase text-white/40 block mb-1">LinkedIn</span>
-                  <span className="text-white">linkedin.com/company/nexxushuman-ai</span>
+                  <a href="https://linkedin.com/company/nexxushuman-ai" target="_blank" rel="noopener" className="text-white hover:text-[#A100FF] transition-colors">
+                    linkedin.com/company/nexxushuman-ai
+                  </a>
                 </div>
+                <div className="border-t border-white/10 pt-4">
+                  <span className="text-[11px] font-bold tracking-[0.15em] uppercase text-white/40 block mb-1">
+                    {lang === "pt" ? "Horário" : "Business Hours"}
+                  </span>
+                  <span className="text-white">
+                    {lang === "pt" ? "Seg–Sex, 9h–18h (BRT)" : "Mon–Fri, 9am–6pm (BRT)"}
+                  </span>
+                </div>
+              </div>
+
+              {/* Nota sobre configuração */}
+              <div className="mt-12 p-4 border border-[#A100FF]/20 bg-[#A100FF]/5">
+                <p className="text-xs text-white/40 leading-relaxed">
+                  {lang === "pt"
+                    ? "💡 Para ativar o envio real de e-mails, configure suas credenciais do EmailJS no arquivo ContactPage.tsx (Service ID, Template ID e Public Key)."
+                    : "💡 To enable real email sending, configure your EmailJS credentials in ContactPage.tsx (Service ID, Template ID and Public Key)."}
+                </p>
               </div>
             </motion.div>
 
-            {/* Right: Form */}
+            {/* Coluna direita: Formulário */}
             <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.2 }}>
-              <form onSubmit={handleSubmit} className="bg-[#111] p-8 lg:p-10 space-y-6">
+              <form ref={formRef} onSubmit={handleSubmit} className="bg-[#111] p-8 lg:p-10 space-y-6">
                 <div>
                   <label className="text-[11px] font-bold tracking-[0.15em] uppercase text-white/40 block mb-2">
                     {t("contact.name")} *
                   </label>
                   <input
                     type="text"
+                    name="from_name"
                     required
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    value={formData.from_name}
+                    onChange={(e) => setFormData({ ...formData, from_name: e.target.value })}
                     className="w-full bg-black border border-white/10 px-4 py-3 text-white text-[15px] focus:border-[#A100FF] focus:outline-none transition-colors"
                     placeholder={lang === "pt" ? "Seu nome completo" : "Your full name"}
                   />
@@ -102,9 +158,10 @@ export default function ContactPage() {
                   </label>
                   <input
                     type="email"
+                    name="from_email"
                     required
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    value={formData.from_email}
+                    onChange={(e) => setFormData({ ...formData, from_email: e.target.value })}
                     className="w-full bg-black border border-white/10 px-4 py-3 text-white text-[15px] focus:border-[#A100FF] focus:outline-none transition-colors"
                     placeholder={lang === "pt" ? "seu@empresa.com" : "you@company.com"}
                   />
@@ -117,6 +174,7 @@ export default function ContactPage() {
                     </label>
                     <input
                       type="text"
+                      name="company"
                       required
                       value={formData.company}
                       onChange={(e) => setFormData({ ...formData, company: e.target.value })}
@@ -129,6 +187,7 @@ export default function ContactPage() {
                     </label>
                     <input
                       type="text"
+                      name="role"
                       value={formData.role}
                       onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                       className="w-full bg-black border border-white/10 px-4 py-3 text-white text-[15px] focus:border-[#A100FF] focus:outline-none transition-colors"
@@ -141,6 +200,7 @@ export default function ContactPage() {
                     {t("contact.message")} *
                   </label>
                   <textarea
+                    name="message"
                     required
                     rows={5}
                     value={formData.message}

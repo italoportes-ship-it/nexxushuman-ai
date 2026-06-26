@@ -24,7 +24,7 @@ function Navbar() {
           <a href="#services" className="text-[15px] text-white/80 hover:text-white transition-colors font-medium">{t("nav.whatWeDo")}</a>
           <a href="#insights" className="text-[15px] text-white/80 hover:text-white transition-colors font-medium">{t("nav.insights")}</a>
           <Link href="/cases" className="text-[15px] text-white/80 hover:text-white transition-colors font-medium">{t("nav.cases")}</Link>
-          <a href="#about" className="text-[15px] text-white/80 hover:text-white transition-colors font-medium">{t("nav.about")}</a>
+          <Link href="/about" className="text-[15px] text-white/80 hover:text-white transition-colors font-medium">{t("nav.about")}</Link>
         </nav>
 
         <div className="flex items-center gap-4">
