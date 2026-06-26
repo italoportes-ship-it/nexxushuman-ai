@@ -8,40 +8,75 @@ import { motion, useInView, useScroll, useTransform } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link } from "wouter";
 
-/* ===== NAVBAR ===== */
+/* ===== NAVBAR com Menu Mobile ===== */
 function Navbar() {
   const { t, lang, setLang } = useLanguage();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-md">
-      <div className="max-w-[1400px] mx-auto flex items-center justify-between px-6 lg:px-10 py-5">
-        <Link href="/" className="flex items-center gap-2 group">
-          <span className="text-[#A100FF] text-2xl font-black transition-transform duration-200 group-hover:translate-x-0.5">&gt;</span>
-          <span className="text-white text-lg font-bold tracking-tight">NexxusHuman-AI</span>
-        </Link>
-
-        <nav className="hidden md:flex items-center gap-8">
-          <a href="#services" className="text-[15px] text-white/80 hover:text-white transition-colors font-medium">{t("nav.whatWeDo")}</a>
-          <Link href="/diagnostico" className="text-[15px] text-[#A100FF] hover:text-white transition-colors font-semibold">{lang === "pt" ? "Diagnóstico IA" : "AI Diagnostic"}</Link>
-          <Link href="/cases" className="text-[15px] text-white/80 hover:text-white transition-colors font-medium">{t("nav.cases")}</Link>
-          <Link href="/blog" className="text-[15px] text-white/80 hover:text-white transition-colors font-medium">{lang === "pt" ? "Blog" : "Blog"}</Link>
-          <Link href="/about" className="text-[15px] text-white/80 hover:text-white transition-colors font-medium">{t("nav.about")}</Link>
-        </nav>
-
-        <div className="flex items-center gap-4">
-          {/* Botão de troca de idioma */}
-          <button
-            onClick={() => setLang(lang === "pt" ? "en" : "pt")}
-            className="text-xs font-bold text-white/50 hover:text-white border border-white/20 px-3 py-1.5 transition-colors"
-          >
-            {lang === "pt" ? "EN" : "PT"}
-          </button>
-          <Link href="/contact" className="hidden sm:inline-flex items-center gap-2 text-[15px] font-semibold text-white hover:text-[#A100FF] transition-colors">
-            {t("nav.contact")} <span className="text-[#A100FF]">&gt;</span>
+    <>
+      <header className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-md">
+        <div className="max-w-[1400px] mx-auto flex items-center justify-between px-6 lg:px-10 py-5">
+          <Link href="/" className="flex items-center gap-2 group">
+            <span className="text-[#A100FF] text-2xl font-black transition-transform duration-200 group-hover:translate-x-0.5">&gt;</span>
+            <span className="text-white text-lg font-bold tracking-tight">NexxusHuman-AI</span>
           </Link>
+
+          {/* Desktop nav */}
+          <nav className="hidden md:flex items-center gap-8">
+            <a href="#services" className="text-[15px] text-white/80 hover:text-white transition-colors font-medium">{t("nav.whatWeDo")}</a>
+            <Link href="/diagnostico" className="text-[15px] text-[#A100FF] hover:text-white transition-colors font-semibold">{lang === "pt" ? "Diagn\u00f3stico IA" : "AI Diagnostic"}</Link>
+            <Link href="/cases" className="text-[15px] text-white/80 hover:text-white transition-colors font-medium">{t("nav.cases")}</Link>
+            <Link href="/blog" className="text-[15px] text-white/80 hover:text-white transition-colors font-medium">Blog</Link>
+            <Link href="/about" className="text-[15px] text-white/80 hover:text-white transition-colors font-medium">{t("nav.about")}</Link>
+          </nav>
+
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setLang(lang === "pt" ? "en" : "pt")}
+              className="text-xs font-bold text-white/50 hover:text-white border border-white/20 px-3 py-1.5 transition-colors"
+            >
+              {lang === "pt" ? "EN" : "PT"}
+            </button>
+            <Link href="/contact" className="hidden md:inline-flex items-center gap-2 text-[15px] font-semibold text-white hover:text-[#A100FF] transition-colors">
+              {t("nav.contact")} <span className="text-[#A100FF]">&gt;</span>
+            </Link>
+            {/* Hamburger button - mobile */}
+            <button
+              onClick={() => setMobileOpen(!mobileOpen)}
+              className="md:hidden flex flex-col gap-[5px] p-2"
+              aria-label="Menu"
+            >
+              <span className={`w-5 h-[2px] bg-white transition-all duration-300 ${mobileOpen ? "rotate-45 translate-y-[7px]" : ""}`} />
+              <span className={`w-5 h-[2px] bg-white transition-all duration-300 ${mobileOpen ? "opacity-0" : ""}`} />
+              <span className={`w-5 h-[2px] bg-white transition-all duration-300 ${mobileOpen ? "-rotate-45 -translate-y-[7px]" : ""}`} />
+            </button>
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
+
+      {/* Mobile menu drawer */}
+      {mobileOpen && (
+        <div className="fixed inset-0 z-40 md:hidden">
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setMobileOpen(false)} />
+          <nav className="absolute top-[72px] left-0 right-0 bg-black border-t border-white/10 p-6 flex flex-col gap-4 animate-in slide-in-from-top-2">
+            <a href="#services" onClick={() => setMobileOpen(false)} className="text-lg text-white/80 hover:text-white font-medium py-2">{t("nav.whatWeDo")}</a>
+            <Link href="/diagnostico" onClick={() => setMobileOpen(false)} className="text-lg text-[#A100FF] font-bold py-2 flex items-center gap-2">
+              {lang === "pt" ? "\u2728 Diagn\u00f3stico IA" : "\u2728 AI Diagnostic"}
+            </Link>
+            <Link href="/cases" onClick={() => setMobileOpen(false)} className="text-lg text-white/80 hover:text-white font-medium py-2">{t("nav.cases")}</Link>
+            <Link href="/blog" onClick={() => setMobileOpen(false)} className="text-lg text-white/80 hover:text-white font-medium py-2">Blog</Link>
+            <Link href="/about" onClick={() => setMobileOpen(false)} className="text-lg text-white/80 hover:text-white font-medium py-2">{t("nav.about")}</Link>
+            <Link href="/contact" onClick={() => setMobileOpen(false)} className="text-lg text-white/80 hover:text-white font-medium py-2">{t("nav.contact")}</Link>
+            <div className="border-t border-white/10 pt-4 mt-2">
+              <Link href="/diagnostico" onClick={() => setMobileOpen(false)} className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#A100FF] text-white font-bold text-[15px]">
+                {lang === "pt" ? "Fazer Diagn\u00f3stico Gratuito" : "Free AI Diagnostic"} &gt;
+              </Link>
+            </div>
+          </nav>
+        </div>
+      )}
+    </>
   );
 }
 
@@ -67,7 +102,6 @@ function HeroSection() {
             <h2 className="text-xl sm:text-2xl font-bold text-white mb-4">{t("hero.subtitle")}</h2>
             <p className="text-base text-white/60 leading-relaxed">{t("hero.desc")}</p>
             <div className="flex flex-col sm:flex-row gap-4 mt-10">
-              {/* CTA PRINCIPAL: Diagnóstico - bem visível */}
               <Link href="/diagnostico" className="inline-flex items-center justify-center gap-3 px-8 py-4 bg-[#A100FF] text-white font-bold text-[15px] hover:bg-[#8800DD] transition-all duration-200 active:scale-[0.97] group">
                 {lang === "pt" ? "Fazer Diagn\u00f3stico Gratuito" : "Free AI Diagnostic"}
                 <span className="group-hover:translate-x-1 transition-transform">&gt;</span>
@@ -77,6 +111,25 @@ function HeroSection() {
               </a>
             </div>
           </div>
+        </motion.div>
+      </motion.div>
+
+      {/* Anima\u00e7\u00e3o de scroll indicator */}
+      <motion.div
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1.5, duration: 0.8 }}
+      >
+        <span className="text-[10px] text-white/40 uppercase tracking-[0.2em] font-medium">
+          {lang === "pt" ? "Role para explorar" : "Scroll to explore"}
+        </span>
+        <motion.div
+          animate={{ y: [0, 8, 0] }}
+          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+          className="w-5 h-8 border-2 border-white/30 rounded-full flex items-start justify-center pt-1.5"
+        >
+          <div className="w-1 h-2 bg-[#A100FF] rounded-full" />
         </motion.div>
       </motion.div>
     </section>
