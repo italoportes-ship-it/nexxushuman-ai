@@ -24,6 +24,7 @@ function Navbar() {
           <a href="#services" className="text-[15px] text-white/80 hover:text-white transition-colors font-medium">{t("nav.whatWeDo")}</a>
           <Link href="/diagnostico" className="text-[15px] text-[#A100FF] hover:text-white transition-colors font-semibold">{lang === "pt" ? "Diagnóstico IA" : "AI Diagnostic"}</Link>
           <Link href="/cases" className="text-[15px] text-white/80 hover:text-white transition-colors font-medium">{t("nav.cases")}</Link>
+          <Link href="/blog" className="text-[15px] text-white/80 hover:text-white transition-colors font-medium">{lang === "pt" ? "Blog" : "Blog"}</Link>
           <Link href="/about" className="text-[15px] text-white/80 hover:text-white transition-colors font-medium">{t("nav.about")}</Link>
         </nav>
 

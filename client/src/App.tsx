@@ -12,6 +12,7 @@ import CaseDetail from "./pages/CaseDetail";
 import ContactPage from "./pages/ContactPage";
 import AboutPage from "./pages/AboutPage";
 import Diagnostico from "./pages/Diagnostico";
+import BlogPage, { BlogArticle } from "./pages/BlogPage";
 import DiagnosticoLanding from "./pages/DiagnosticoLanding";
 import Resultado from "./pages/Resultado";
 
@@ -27,6 +28,8 @@ function Router() {
       <Route path="/diagnostico" component={DiagnosticoLanding} />
       <Route path="/diagnostico/iniciar" component={Diagnostico} />
       <Route path="/resultado" component={Resultado} />
+      <Route path="/blog" component={BlogPage} />
+      <Route path="/blog/:id" component={BlogArticle} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>

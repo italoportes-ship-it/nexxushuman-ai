@@ -3,13 +3,17 @@
  * ======================================================= */
 
 import { motion, useInView } from "framer-motion";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { Link } from "wouter";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAnalytics } from "@/hooks/useAnalytics";
 import { Brain, Scan, TrendingUp, Shield, Target, Zap, ArrowRight, CheckCircle2 } from "lucide-react";
 
 export default function DiagnosticoLanding() {
   const { lang, setLang } = useLanguage();
+  const { trackLandingView, trackDiagnosticoStart } = useAnalytics();
+
+  useEffect(() => { trackLandingView(); }, []);
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -52,7 +56,7 @@ export default function DiagnosticoLanding() {
                 ? "Em 5 minutos, mapeamos processos automatizáveis, calculamos o ROI potencial e recomendamos agentes de IA específicos para sua empresa."
                 : "In 5 minutes, we map automatable processes, calculate potential ROI and recommend specific AI agents for your company."}
             </p>
-            <Link href="/diagnostico/iniciar" className="inline-flex items-center gap-3 px-8 py-4 bg-[#A100FF] text-white font-bold text-[15px] hover:bg-[#8800DD] transition-colors group">
+            <Link href="/diagnostico/iniciar" onClick={() => trackDiagnosticoStart()} className="inline-flex items-center gap-3 px-8 py-4 bg-[#A100FF] text-white font-bold text-[15px] hover:bg-[#8800DD] transition-colors group">
               {lang === "pt" ? "Iniciar Diagnóstico Gratuito" : "Start Free Diagnostic"}
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
