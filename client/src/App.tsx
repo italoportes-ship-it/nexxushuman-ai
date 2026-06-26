@@ -4,27 +4,37 @@ import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { LanguageProvider } from "./contexts/LanguageContext";
 import Home from "./pages/Home";
+import MethodologyPage from "./pages/MethodologyPage";
+import CasesPage from "./pages/CasesPage";
+import CaseDetail from "./pages/CaseDetail";
+import ContactPage from "./pages/ContactPage";
 
 function Router() {
   return (
     <Switch>
-      <Route path={"/"} component={Home} />
-      <Route path={"/404"} component={NotFound} />
+      <Route path="/" component={Home} />
+      <Route path="/methodology" component={MethodologyPage} />
+      <Route path="/cases" component={CasesPage} />
+      <Route path="/cases/:id" component={CaseDetail} />
+      <Route path="/contact" component={ContactPage} />
+      <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>
   );
 }
 
-/* ALTERADO: Tema escuro como padrão para combinar com o design navy */
 function App() {
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="dark">
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-        </TooltipProvider>
+        <LanguageProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Router />
+          </TooltipProvider>
+        </LanguageProvider>
       </ThemeProvider>
     </ErrorBoundary>
   );
