@@ -1,515 +1,433 @@
-/* ===== NexxusHuman-AI - Página Principal =====
- * Baseado na estrutura do Dalton Lab
- * Identidade visual inspirada na McKinsey
- * Marca: NexxusHuman-AI
- * ============================================= */
+/* ===== NexxusHuman-AI — Redesign Accenture-Inspired =====
+ * Design: Fundo preto, tipografia bold, acento violeta elétrico
+ * Conteúdo: Plano de consultoria em organização agêntica
+ * Referência visual: accenture.com (layout, cards, movimentação)
+ * ======================================================== */
 
 import { useEffect, useRef, useState } from "react";
-import { motion, useInView } from "framer-motion";
+import { motion, useInView, useScroll, useTransform } from "framer-motion";
 
-// ===== COMPONENTES DE SEÇÃO =====
-
-/* ALTERADO: Navbar com marca NexxusHuman-AI e estilo McKinsey */
+/* ===== NAVBAR — Estilo Accenture: minimalista, fundo transparente ===== */
 function Navbar() {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 50);
+    const handleScroll = () => setScrolled(window.scrollY > 80);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled
-          ? "bg-[#051C2C]/95 backdrop-blur-xl border-b border-white/5"
-          : "bg-transparent"
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        scrolled ? "bg-black/90 backdrop-blur-md" : "bg-transparent"
       }`}
     >
-      <div className="container flex items-center justify-between py-4">
-        {/* Logo NexxusHuman-AI */}
-        <a href="/" className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-[#0070AD] flex items-center justify-center">
-            <span className="text-white font-bold text-sm">N</span>
-          </div>
-          <span className="text-white font-semibold text-lg tracking-tight">
-            Nexxus<span className="text-[#0070AD]">Human-AI</span>
+      <div className="max-w-[1400px] mx-auto flex items-center justify-between px-6 lg:px-10 py-5">
+        {/* ALTERADO: Logo com símbolo ">" estilo Accenture */}
+        <a href="/" className="flex items-center gap-2 group">
+          <span className="text-[#A100FF] text-2xl font-black transition-transform duration-200 group-hover:translate-x-0.5">&gt;</span>
+          <span className="text-white text-lg font-bold tracking-tight">
+            NexxusHuman-AI
           </span>
         </a>
 
         {/* Navegação */}
         <nav className="hidden md:flex items-center gap-8">
-          <a href="#methodology" className="text-sm text-white/70 hover:text-white transition-colors">
-            Methodology
+          <a href="#services" className="text-[15px] text-white/80 hover:text-white transition-colors font-medium">
+            What we do
           </a>
-          <a href="#cases" className="text-sm text-white/70 hover:text-white transition-colors">
+          <a href="#insights" className="text-[15px] text-white/80 hover:text-white transition-colors font-medium">
+            Insights
+          </a>
+          <a href="#cases" className="text-[15px] text-white/80 hover:text-white transition-colors font-medium">
             Cases
           </a>
-          <a href="#content" className="text-sm text-white/70 hover:text-white transition-colors">
-            Content
-          </a>
-          <a href="#about" className="text-sm text-white/70 hover:text-white transition-colors">
-            About us
+          <a href="#about" className="text-[15px] text-white/80 hover:text-white transition-colors font-medium">
+            About
           </a>
         </nav>
 
-        {/* CTA */}
         <a
           href="#contact"
-          className="hidden sm:inline-flex items-center px-5 py-2.5 rounded-full text-sm font-semibold bg-[#0070AD] text-white hover:bg-[#0085CC] transition-all duration-200 active:scale-[0.97]"
+          className="hidden sm:inline-flex items-center gap-2 text-[15px] font-semibold text-white hover:text-[#A100FF] transition-colors"
         >
-          Get in touch
+          Contact us
+          <span className="text-[#A100FF]">&gt;</span>
         </a>
       </div>
     </header>
   );
 }
 
-/* ALTERADO: Hero section com estilo corporativo McKinsey */
+/* ===== HERO — Estilo Accenture: tipografia massiva, fundo preto ===== */
 function HeroSection() {
+  const { scrollYProgress } = useScroll();
+  const opacity = useTransform(scrollYProgress, [0, 0.15], [1, 0]);
+  const y = useTransform(scrollYProgress, [0, 0.15], [0, -60]);
+
   return (
-    <section className="relative min-h-screen flex items-center overflow-hidden">
-      {/* Background grid pattern - inspirado no Dalton Lab */}
-      <div
-        className="absolute inset-0 opacity-40"
+    <section className="relative min-h-screen flex items-center bg-black overflow-hidden">
+      {/* Background gradient sutil */}
+      <div className="absolute inset-0 bg-gradient-to-br from-black via-black to-[#1a0033] opacity-80" />
+      
+      {/* Grid pattern sutil */}
+      <div className="absolute inset-0 opacity-[0.03]"
         style={{
-          backgroundImage:
-            "linear-gradient(rgba(0,112,173,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(0,112,173,0.06) 1px, transparent 1px)",
-          backgroundSize: "80px 80px",
-          maskImage: "radial-gradient(ellipse 80% 60% at 60% 0%, black 0%, transparent 70%)",
-          WebkitMaskImage: "radial-gradient(ellipse 80% 60% at 60% 0%, black 0%, transparent 70%)",
-        }}
-      />
-      {/* Glow */}
-      <div
-        className="absolute top-[-15%] right-[-5%] w-[60vw] h-[60vw] max-w-[700px] max-h-[700px] pointer-events-none opacity-60"
-        style={{
-          background: "radial-gradient(circle at 50% 40%, rgba(0,112,173,0.2) 0%, rgba(0,112,173,0.08) 35%, transparent 65%)",
-          filter: "blur(80px)",
+          backgroundImage: "linear-gradient(white 1px, transparent 1px), linear-gradient(90deg, white 1px, transparent 1px)",
+          backgroundSize: "60px 60px"
         }}
       />
 
-      <div className="container relative z-10 pt-32 pb-24">
+      <motion.div style={{ opacity, y }} className="relative z-10 max-w-[1400px] mx-auto px-6 lg:px-10 pt-32 pb-20 w-full">
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1] }}
+          transition={{ duration: 1, ease: [0.23, 1, 0.32, 1] }}
         >
-          {/* ALTERADO: Headline com tipografia serif inspirada na McKinsey */}
-          <h1 className="text-4xl sm:text-5xl lg:text-[4.5rem] font-extrabold leading-[1.05] tracking-tight max-w-[18ch]">
-            Transforming enterprises into{" "}
-            <span className="font-serif italic font-medium text-[#0070AD]">
-              Agentic Organizations
-            </span>
+          {/* ALTERADO: Headline massiva estilo Accenture */}
+          <h1 className="text-5xl sm:text-7xl lg:text-[6.5rem] font-black leading-[0.95] tracking-tight uppercase max-w-[14ch]">
+            <span className="text-white">Together we</span>
+            <br />
+            <span className="text-white">rein</span>
+            <span className="text-[#A100FF]">&gt;</span>
+            <span className="text-white">ented</span>
           </h1>
 
-          {/* CTAs */}
-          <div className="flex flex-col sm:flex-row gap-3 mt-10">
+          {/* Subtítulo */}
+          <div className="mt-12 max-w-xl">
+            <h2 className="text-xl sm:text-2xl font-bold text-white mb-4">
+              The Agentic Organization
+            </h2>
+            <p className="text-base text-white/60 leading-relaxed">
+              In a world of constant change, the agentic model is the new frontier of productivity. 
+              We transform enterprises where humans and AI agents operate as an integrated system — 
+              multiplying results up to 20x.
+            </p>
             <a
-              href="#contact"
-              className="inline-flex items-center justify-center px-7 py-3.5 rounded-full text-sm font-semibold bg-[#0070AD] text-white hover:bg-[#0085CC] transition-all duration-200 active:scale-[0.97]"
+              href="#services"
+              className="inline-flex items-center gap-2 mt-8 text-[15px] font-bold text-white hover:text-[#A100FF] transition-colors group"
             >
-              Schedule a consultation
-            </a>
-            <a
-              href="#methodology"
-              className="inline-flex items-center justify-center px-7 py-3.5 rounded-full text-sm font-semibold border border-white/15 text-white hover:border-white/30 hover:bg-white/[0.03] transition-all duration-200"
-            >
-              Explore our methodology
+              See what we do
+              <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-[#A100FF] text-white text-sm group-hover:translate-x-1 transition-transform">
+                &gt;
+              </span>
             </a>
           </div>
         </motion.div>
-      </div>
+      </motion.div>
     </section>
   );
 }
 
-/* ALTERADO: Carrossel de logos com estilo clean */
-function LogosCarousel() {
-  const logos = [
-    "Jeisys", "Rumo", "Mundial Mix", "Neogrid", "Imperatriz",
-    "Accesstage", "Billion Dollar Boy", "Fialdini", "SmartRisk", "Practical Center"
+/* ===== INSIGHTS CARDS — Grid estilo Accenture ===== */
+function InsightsSection() {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-80px" });
+
+  const insights = [
+    { type: "Methodology", title: "The agentic journey: from immersion to autonomous culture", bg: "bg-white", text: "text-black" },
+    { type: "Perspective", title: "AI agents are redesigning processes, not just automating them", bg: "bg-[#A100FF]", text: "text-white" },
+    { type: "Research", title: "Agentic organizations multiply productivity by up to 20x", bg: "bg-black border border-white/10", text: "text-white" },
+    { type: "Case Study", title: "From KYC in 15 days to 4 hours: banking transformation", bg: "bg-[#1a1a1a]", text: "text-white" },
   ];
 
   return (
-    <section className="py-10 border-y border-white/5 overflow-hidden">
-      <div className="flex animate-[scroll_30s_linear_infinite]" style={{ width: "max-content" }}>
-        {[...logos, ...logos].map((logo, i) => (
-          <div
-            key={i}
-            className="flex items-center justify-center px-8 min-w-[160px]"
-          >
-            <span className="text-white/30 text-sm font-semibold tracking-wider uppercase whitespace-nowrap">
-              {logo}
-            </span>
-          </div>
-        ))}
+    <section ref={ref} id="insights" className="py-0 bg-black">
+      <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[2px]">
+          {insights.map((item, i) => (
+            <motion.a
+              key={i}
+              href="#"
+              initial={{ opacity: 0, y: 30 }}
+              animate={isInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.6, delay: i * 0.1 }}
+              className={`${item.bg} ${item.text} p-8 min-h-[320px] flex flex-col justify-between group hover:opacity-90 transition-opacity`}
+            >
+              <div>
+                <span className="text-[11px] font-bold tracking-[0.2em] uppercase opacity-70 block mb-4">
+                  {item.type}
+                </span>
+                <h3 className="text-lg sm:text-xl font-bold leading-tight">
+                  {item.title}
+                </h3>
+              </div>
+              <span className="text-sm font-semibold opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                Read more <span className="text-[#A100FF]">&gt;</span>
+              </span>
+            </motion.a>
+          ))}
+        </div>
       </div>
-      <style>{`
-        @keyframes scroll {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-      `}</style>
     </section>
   );
 }
 
-/* ALTERADO: Seção de destaque com estilo McKinsey */
-function HighlightSection() {
+/* ===== SERVICES / METHODOLOGY — Estilo Accenture ===== */
+function ServicesSection() {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const isInView = useInView(ref, { once: true, margin: "-80px" });
+
+  const phases = [
+    { num: "01", title: "Agentic Immersion", desc: "We map where AI creates value and build the implementation roadmap. Strategic alignment with C-suite, deep process analysis, cultural assessment.", duration: "4–6 weeks" },
+    { num: "02", title: "Agentic Sprint", desc: "We develop and deploy agent factories in priority domains. Hybrid squads redesign processes from scratch with AI-first logic.", duration: "8–12 weeks" },
+    { num: "03", title: "Agentic Operation", desc: "We scale AI across the enterprise with robust architecture, embedded governance and agent-to-agent protocols.", duration: "12–24 weeks" },
+    { num: "04", title: "Agentic Culture", desc: "We build organization-wide fluency through large-scale reskilling, ethical orchestration frameworks and continuous evolution.", duration: "Ongoing" },
+  ];
 
   return (
-    <section ref={ref} className="py-28">
-      <div className="container">
+    <section ref={ref} id="services" className="py-24 lg:py-32 bg-black">
+      <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.7 }}
+        >
+          <span className="text-[11px] font-bold tracking-[0.2em] uppercase text-[#A100FF] block mb-6">
+            Our Methodology
+          </span>
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black leading-[1] tracking-tight text-white max-w-[20ch] mb-16">
+            The four phases of agentic transformation
+          </h2>
+        </motion.div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-[2px]">
+          {phases.map((phase, i) => (
+            <motion.div
+              key={phase.num}
+              initial={{ opacity: 0, y: 20 }}
+              animate={isInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.5, delay: 0.2 + i * 0.1 }}
+              className="bg-[#111] p-8 lg:p-10 group hover:bg-[#1a1a1a] transition-colors"
+            >
+              <div className="flex items-start justify-between mb-6">
+                <span className="text-[#A100FF] font-mono text-sm font-bold">{phase.num}</span>
+                <span className="text-[11px] text-white/40 font-medium">{phase.duration}</span>
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-4">{phase.title}</h3>
+              <p className="text-[15px] text-white/55 leading-relaxed">{phase.desc}</p>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ===== VALUE PROPOSITION — Seção de impacto ===== */
+function ValueSection() {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-80px" });
+
+  return (
+    <section ref={ref} className="py-24 lg:py-32 bg-white text-black">
+      <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1] }}
-          className="text-center max-w-[900px] mx-auto"
+          transition={{ duration: 0.8 }}
+          className="max-w-[900px]"
         >
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-[1.1] tracking-tight">
-            We transform your company into an Agentic Organization, where{" "}
-            <span className="font-serif italic font-medium text-[#0070AD]">
-              AI agents work side by side with your team
-            </span>
+          <span className="text-[11px] font-bold tracking-[0.2em] uppercase text-[#A100FF] block mb-6">
+            Value Proposition
+          </span>
+          <h2 className="text-4xl sm:text-5xl lg:text-[3.5rem] font-black leading-[1.05] tracking-tight mb-8">
+            Not incremental automation.{" "}
+            <span className="text-[#A100FF]">Structural reinvention.</span>
           </h2>
+          <p className="text-lg text-black/60 leading-relaxed mb-12 max-w-[700px]">
+            We don't optimize old processes — we rebuild them from the ground up with agentic logic. 
+            Small, highly qualified human teams supervising factories of 50 to 100 AI agents executing 
+            complete processes: client onboarding, financial closing, product launches.
+          </p>
         </motion.div>
-      </div>
-    </section>
-  );
-}
 
-/* ALTERADO: Grid de clientes com estilo corporativo */
-function ClientsSection() {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
-  const clients = ["Rumo", "Mundial Mix", "Imperatriz", "Neogrid", "Accesstage", "Jeisys"];
-
-  return (
-    <section ref={ref} className="py-20">
-      <div className="container">
+        {/* Metrics grid */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.7 }}
+          transition={{ duration: 0.7, delay: 0.3 }}
+          className="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 mt-8"
         >
-          {/* ALTERADO: Label estilo McKinsey - uppercase com tracking */}
-          <span className="text-xs font-semibold tracking-[0.2em] uppercase text-[#0070AD] block text-center mb-12">
-            Some of our clients
-          </span>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-8 max-w-[700px] mx-auto">
-            {clients.map((client) => (
-              <div key={client} className="flex items-center justify-center py-4">
-                <span className="text-white/40 text-base font-semibold tracking-wide">
-                  {client}
-                </span>
-              </div>
-            ))}
-          </div>
+          {[
+            { value: "20x", label: "Productivity multiplier" },
+            { value: "95%", label: "Cycle time reduction" },
+            { value: "85%", label: "Cost reduction per transaction" },
+            { value: "90%", label: "Autonomous operational decisions" },
+          ].map((metric, i) => (
+            <div key={i} className="border-t-2 border-black pt-4">
+              <span className="text-4xl lg:text-5xl font-black text-black block mb-2">{metric.value}</span>
+              <span className="text-sm text-black/50 font-medium">{metric.label}</span>
+            </div>
+          ))}
         </motion.div>
       </div>
     </section>
   );
 }
 
-/* ALTERADO: Org Chart com canvas animado */
-function OrgChartSection() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [count, setCount] = useState(17391);
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCount((c) => c + Math.floor(Math.random() * 5) + 1);
-    }, 2500);
-    return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    let animId: number;
-    const nodes: { x: number; y: number; r: number; vx: number; vy: number; pulse: number; opacity: number }[] = [];
-
-    function resize() {
-      if (!canvas) return;
-      canvas.width = canvas.offsetWidth * 2;
-      canvas.height = canvas.offsetHeight * 2;
-      ctx!.scale(2, 2);
-    }
-
-    function init() {
-      if (!canvas) return;
-      nodes.length = 0;
-      const w = canvas.offsetWidth;
-      const h = canvas.offsetHeight;
-      for (let i = 0; i < 18; i++) {
-        nodes.push({
-          x: Math.random() * w,
-          y: Math.random() * h,
-          r: 2 + Math.random() * 3,
-          vx: (Math.random() - 0.5) * 0.25,
-          vy: (Math.random() - 0.5) * 0.25,
-          pulse: Math.random() * Math.PI * 2,
-          opacity: 0.3 + Math.random() * 0.4,
-        });
-      }
-    }
-
-    function draw() {
-      if (!canvas || !ctx) return;
-      const w = canvas.offsetWidth;
-      const h = canvas.offsetHeight;
-      ctx.clearRect(0, 0, w, h);
-
-      nodes.forEach((n) => {
-        n.x += n.vx;
-        n.y += n.vy;
-        n.pulse += 0.015;
-        if (n.x < 0 || n.x > w) n.vx *= -1;
-        if (n.y < 0 || n.y > h) n.vy *= -1;
-      });
-
-      // Connections
-      for (let i = 0; i < nodes.length; i++) {
-        for (let j = i + 1; j < nodes.length; j++) {
-          const d = Math.hypot(nodes[j].x - nodes[i].x, nodes[j].y - nodes[i].y);
-          if (d < 150) {
-            ctx.beginPath();
-            ctx.moveTo(nodes[i].x, nodes[i].y);
-            ctx.lineTo(nodes[j].x, nodes[j].y);
-            ctx.strokeStyle = `rgba(0,112,173,${(1 - d / 150) * 0.15})`;
-            ctx.lineWidth = 0.8;
-            ctx.stroke();
-          }
-        }
-      }
-
-      // Nodes
-      nodes.forEach((n) => {
-        const pr = n.r + Math.sin(n.pulse) * 1;
-        ctx.beginPath();
-        ctx.arc(n.x, n.y, pr, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(0,112,173,${n.opacity})`;
-        ctx.fill();
-      });
-
-      animId = requestAnimationFrame(draw);
-    }
-
-    resize();
-    init();
-    draw();
-
-    const handleResize = () => { resize(); init(); };
-    window.addEventListener("resize", handleResize);
-    return () => {
-      cancelAnimationFrame(animId);
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
-
-  return (
-    <section ref={ref} className="py-24">
-      <div className="container text-center">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.7 }}
-        >
-          <span className="text-xs font-semibold tracking-[0.2em] uppercase text-[#0070AD] block mb-4">
-            Agentic Org Chart
-          </span>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-[1.1] tracking-tight mb-6">
-            Your bigger{" "}
-            <span className="font-serif italic font-medium text-[#0070AD]">agentic</span>{" "}
-            operational structure
-          </h2>
-          <div className="flex items-baseline justify-center gap-2 mb-8 flex-wrap">
-            <span className="text-sm text-white/50">Operação ao vivo —</span>
-            <span className="font-mono text-2xl font-bold text-[#0070AD]">
-              {count.toLocaleString()}
-            </span>
-            <span className="text-sm text-white/50">tarefas processadas hoje</span>
-          </div>
-          <div className="relative h-[250px] w-full">
-            <canvas ref={canvasRef} className="w-full h-full" />
-          </div>
-        </motion.div>
-      </div>
-    </section>
-  );
-}
-
-/* ALTERADO: Metodologia com cards estilo McKinsey */
-function MethodologySection() {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
-
-  const steps = [
-    { num: "01", title: "Agentic Immersion", desc: "We map where AI creates value and the implementation roadmap for your business." },
-    { num: "02", title: "Agentic Sprint", desc: "We develop and deploy AI agents to drive competitive advantage and reduce costs." },
-    { num: "03", title: "Agentic Operation", desc: "We scale AI across your entire company with architecture, governance and autonomy." },
-    { num: "04", title: "Agentic Culture", desc: "We train your team to use AI autonomously and gain productivity." },
-  ];
-
-  return (
-    <section ref={ref} id="methodology" className="py-24">
-      <div className="container">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.7 }}
-        >
-          <span className="text-xs font-semibold tracking-[0.2em] uppercase text-[#0070AD] block mb-4">
-            Methodology
-          </span>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-[1.1] tracking-tight mb-12">
-            The{" "}
-            <span className="font-serif italic font-medium text-[#0070AD]">agentic</span>{" "}
-            journey
-          </h2>
-
-          {/* ALTERADO: Grid de cards com bordas sutis estilo McKinsey */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {steps.map((step, i) => (
-              <motion.div
-                key={step.num}
-                initial={{ opacity: 0, y: 20 }}
-                animate={isInView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.5, delay: i * 0.1 }}
-                className="group p-6 rounded-xl border border-white/8 bg-white/[0.02] hover:border-[#0070AD]/30 hover:bg-[#0070AD]/[0.03] transition-all duration-300"
-              >
-                <span className="font-mono text-sm font-semibold text-[#0070AD] block mb-4">
-                  {step.num}
-                </span>
-                <h3 className="text-lg font-bold mb-3 text-white">{step.title}</h3>
-                <p className="text-sm text-white/55 leading-relaxed">{step.desc}</p>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
-      </div>
-    </section>
-  );
-}
-
-/* ALTERADO: Cases section com cards */
+/* ===== CASES — Grid estilo Accenture ===== */
 function CasesSection() {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const isInView = useInView(ref, { once: true, margin: "-80px" });
 
   const cases = [
-    { name: "Jeisys", industry: "Global Industry", metric: "49 processes automated", tag: "agentic support & marketing", hasImage: true },
-    { name: "SmartRisk", industry: "Logistics", metric: "24/7 monitoring", tag: "Autonomous fleet triage", hasImage: false },
-    { name: "Unymus", industry: "Financial Services", metric: "100% autonomous collections", tag: "delinquent revenue recovery", hasImage: false },
-    { name: "Fialdini", industry: "Legal", metric: "Autonomous classification", tag: "legal-case triage & distribution", hasImage: false },
+    { sector: "Financial Services", title: "From 15-day KYC to 4 hours", desc: "60 specialized agents handling document collection, cross-verification, risk analysis and compliance. Human team of 4 senior analysts supervises exceptions.", metric: "80% cost reduction" },
+    { sector: "Manufacturing", title: "Real-time production planning", desc: "Agents monitoring market signals, simulating scenarios, optimizing resource allocation and recommending daily adjustments.", metric: "40% inventory reduction" },
+    { sector: "Insurance", title: "Claims process rebuilt from zero", desc: "Triage agents, investigation agents, settlement agents and communication agents. Human experts intervene only in high-complexity cases.", metric: "5-day resolution (was 45)" },
+    { sector: "Retail", title: "Dynamic pricing at scale", desc: "Agents monitoring competition, demand elasticity and costs in real-time. Category managers supervise strategies and validate high-impact changes.", metric: "+4pp gross margin" },
   ];
 
   return (
-    <section ref={ref} id="cases" className="py-24">
-      <div className="container">
+    <section ref={ref} id="cases" className="py-24 lg:py-32 bg-black">
+      <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.7 }}
+          className="mb-16"
         >
-          <div className="flex items-center justify-between mb-12">
-            <div>
-              <span className="text-xs font-semibold tracking-[0.2em] uppercase text-[#0070AD] block mb-4">
-                Cases
-              </span>
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-[1.1] tracking-tight">
-                Who already operates with an{" "}
-                <span className="font-serif italic font-medium text-[#0070AD]">agentic</span>{" "}
-                structure
-              </h2>
-            </div>
-            <a href="#" className="hidden sm:inline-flex text-sm font-semibold text-[#0070AD] hover:text-[#0085CC] transition-colors">
-              See all →
-            </a>
-          </div>
+          <span className="text-[11px] font-bold tracking-[0.2em] uppercase text-[#A100FF] block mb-6">
+            Case Studies
+          </span>
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black leading-[1] tracking-tight text-white max-w-[18ch]">
+            Reinvention in action
+          </h2>
+        </motion.div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {cases.map((c, i) => (
-              <motion.div
-                key={c.name}
-                initial={{ opacity: 0, y: 20 }}
-                animate={isInView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.5, delay: i * 0.1 }}
-                className="group rounded-xl border border-white/8 bg-white/[0.02] overflow-hidden hover:border-[#0070AD]/30 transition-all duration-300 hover:-translate-y-1"
-              >
-                {/* Card image area */}
-                <div className="h-36 bg-[#051C2C] flex items-center justify-center border-b border-white/5">
-                  {c.hasImage ? (
-                    <img
-                      src="/manus-storage/foto-jeisys_70c3e1ec.jpg"
-                      alt={c.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <span className="text-white/20 text-2xl font-bold">{c.name[0]}</span>
-                  )}
-                </div>
-                <div className="p-5">
-                  <h4 className="text-base font-bold text-white mb-1">{c.name}</h4>
-                  <span className="text-[10px] font-semibold tracking-[0.15em] uppercase text-white/40 block mb-3">
-                    {c.industry}
-                  </span>
-                  <p className="text-sm font-bold text-[#0070AD] mb-1">{c.metric}</p>
-                  <span className="text-[11px] uppercase tracking-wider text-white/40">
-                    {c.tag}
-                  </span>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-[2px]">
+          {cases.map((c, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 20 }}
+              animate={isInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.5, delay: 0.2 + i * 0.1 }}
+              className="bg-[#111] p-8 lg:p-10 group hover:bg-[#1a1a1a] transition-colors"
+            >
+              <span className="text-[11px] font-bold tracking-[0.2em] uppercase text-[#A100FF] block mb-3">
+                {c.sector}
+              </span>
+              <h3 className="text-xl lg:text-2xl font-bold text-white mb-4">{c.title}</h3>
+              <p className="text-[15px] text-white/50 leading-relaxed mb-6">{c.desc}</p>
+              <div className="border-t border-white/10 pt-4">
+                <span className="text-lg font-bold text-[#A100FF]">{c.metric}</span>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ===== QUOTE — Estilo Accenture com citação de liderança ===== */
+function QuoteSection() {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-80px" });
+
+  return (
+    <section ref={ref} className="py-24 lg:py-32 bg-[#A100FF]">
+      <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.8 }}
+          className="max-w-[900px]"
+        >
+          <blockquote className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white leading-[1.2] mb-8">
+            "Companies will have a greater technology landscape, but the true differentiator 
+            will be the ability to preserve identity and cohesion while everything around changes rapidly. 
+            It is human in the lead, not human in the loop."
+          </blockquote>
+          <p className="text-white/80 text-sm font-semibold">
+            — NexxusHuman-AI Leadership Perspective
+          </p>
         </motion.div>
       </div>
     </section>
   );
 }
 
-/* ALTERADO: CTA section com estilo premium */
-function CTASection() {
+/* ===== EVOLUTION PLAN — Timeline ===== */
+function EvolutionSection() {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const isInView = useInView(ref, { once: true, margin: "-80px" });
+
+  const horizons = [
+    { period: "0–6 months", title: "Foundation", desc: "Align leadership, deploy first agentic domains, build the Center of Excellence. Generate concrete evidence for expansion." },
+    { period: "6–18 months", title: "Expansion", desc: "Scale to multiple domains simultaneously. CoE takes the lead. Org chart formally redesigned for agentic structure." },
+    { period: "18–36 months", title: "Maturity", desc: "Organization operates predominantly in agentic mode. Humans focus on strategic supervision, innovation and high-value relationships." },
+    { period: "36+ months", title: "Continuous Reinvention", desc: "Self-reinvention capability. Strategic planning agents monitor the competitive environment and recommend business model pivots." },
+  ];
 
   return (
-    <section ref={ref} id="contact" className="py-28 relative">
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <div className="w-[500px] h-[500px] rounded-full bg-[#0070AD]/5 blur-[100px]" />
-      </div>
-      <div className="container relative z-10 text-center">
+    <section ref={ref} id="about" className="py-24 lg:py-32 bg-black">
+      <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.7 }}
+          className="mb-16"
         >
-          <span className="text-xs font-semibold tracking-[0.2em] uppercase text-[#0070AD] block mb-4">
-            The next level
+          <span className="text-[11px] font-bold tracking-[0.2em] uppercase text-[#A100FF] block mb-6">
+            Evolution Plan
           </span>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-[1.1] tracking-tight mb-6">
-            Become an{" "}
-            <span className="font-serif italic font-medium text-[#0070AD]">
-              Agentic Organization
-            </span>
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black leading-[1] tracking-tight text-white max-w-[18ch]">
+            Four horizons to full reinvention
           </h2>
-          <p className="text-lg text-white/50 mb-10 max-w-md mx-auto">
-            Trust those who guide you the right way through transformation.
+        </motion.div>
+
+        <div className="space-y-[2px]">
+          {horizons.map((h, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, x: -20 }}
+              animate={isInView ? { opacity: 1, x: 0 } : {}}
+              transition={{ duration: 0.5, delay: 0.2 + i * 0.12 }}
+              className="bg-[#111] p-8 lg:p-10 flex flex-col lg:flex-row lg:items-start gap-6 lg:gap-12 hover:bg-[#1a1a1a] transition-colors"
+            >
+              <div className="lg:w-48 shrink-0">
+                <span className="text-[11px] font-bold tracking-[0.15em] uppercase text-[#A100FF] block mb-1">
+                  {h.period}
+                </span>
+                <h3 className="text-xl font-bold text-white">{h.title}</h3>
+              </div>
+              <p className="text-[15px] text-white/50 leading-relaxed">{h.desc}</p>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ===== CTA SECTION ===== */
+function CTASection() {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-80px" });
+
+  return (
+    <section ref={ref} id="contact" className="py-24 lg:py-32 bg-white text-black">
+      <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.8 }}
+        >
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black leading-[1] tracking-tight max-w-[16ch] mb-8">
+            Ready to rein<span className="text-[#A100FF]">&gt;</span>ent?
+          </h2>
+          <p className="text-lg text-black/55 max-w-[600px] mb-10 leading-relaxed">
+            The question is not whether your organization will be transformed — 
+            it's whether you will lead that transformation or be transformed by it.
           </p>
           <a
             href="#"
-            className="inline-flex items-center justify-center px-8 py-4 rounded-full text-base font-semibold bg-[#0070AD] text-white hover:bg-[#0085CC] transition-all duration-200 active:scale-[0.97]"
+            className="inline-flex items-center gap-3 px-8 py-4 bg-black text-white font-bold text-[15px] hover:bg-[#A100FF] transition-colors duration-300 group"
           >
             Schedule a consultation
+            <span className="text-[#A100FF] group-hover:text-white transition-colors">&gt;</span>
           </a>
         </motion.div>
       </div>
@@ -517,130 +435,51 @@ function CTASection() {
   );
 }
 
-/* ALTERADO: Content section com cards de artigos */
-function ContentSection() {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
-
-  const articles = [
-    { type: "Insight", date: "Jun 2026", title: "The agentic organization is the new frontier of productivity", source: "NexxusHuman-AI" },
-    { type: "Insight", date: "May 2026", title: "The AI Paradox in Marketing: Technology is Everywhere, Except in Results", source: "NexxusHuman-AI" },
-    { type: "Insight", date: "May 2026", title: "Productive Individuals Don't Make Productive Companies", source: "NexxusHuman-AI" },
-    { type: "Media", date: "Jun 2026", title: "AI promises to cut costs and accelerate infrastructure projects", source: "Industry Report" },
-  ];
-
-  return (
-    <section ref={ref} id="content" className="py-24">
-      <div className="container">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.7 }}
-        >
-          <div className="flex items-center justify-between mb-12">
-            <span className="text-xs font-semibold tracking-[0.2em] uppercase text-[#0070AD]">
-              Content
-            </span>
-            <a href="#" className="text-sm font-semibold text-[#0070AD] hover:text-[#0085CC] transition-colors">
-              View all →
-            </a>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {articles.map((article, i) => (
-              <motion.a
-                key={i}
-                href="#"
-                initial={{ opacity: 0, y: 20 }}
-                animate={isInView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.5, delay: i * 0.08 }}
-                className="group rounded-xl border border-white/8 bg-white/[0.02] overflow-hidden hover:border-[#0070AD]/30 transition-all duration-300 hover:-translate-y-1"
-              >
-                {/* Article image placeholder */}
-                <div className="h-32 bg-gradient-to-br from-[#0070AD]/10 to-[#051C2C] border-b border-white/5" />
-                <div className="p-5">
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="text-[10px] font-bold tracking-[0.15em] uppercase text-[#0070AD]">
-                      {article.type}
-                    </span>
-                    <span className="text-[10px] text-white/30">{article.date}</span>
-                  </div>
-                  <p className="text-sm text-white/80 leading-relaxed mb-3 line-clamp-3">
-                    {article.title}
-                  </p>
-                  <span className="text-xs text-white/35">{article.source}</span>
-                </div>
-              </motion.a>
-            ))}
-          </div>
-        </motion.div>
-      </div>
-    </section>
-  );
-}
-
-/* ALTERADO: Footer com marca NexxusHuman-AI */
+/* ===== FOOTER — Estilo Accenture ===== */
 function Footer() {
   return (
-    <footer className="py-16 border-t border-white/8">
-      <div className="container">
-        <div className="flex flex-col items-center gap-6">
+    <footer className="py-12 bg-[#111] border-t border-white/5">
+      <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
           {/* Logo */}
-          <div className="flex items-center gap-3">
-            <div className="w-7 h-7 rounded-lg bg-[#0070AD] flex items-center justify-center">
-              <span className="text-white font-bold text-xs">N</span>
-            </div>
-            <span className="text-white font-semibold tracking-tight">
-              Nexxus<span className="text-[#0070AD]">Human-AI</span>
-            </span>
+          <div className="flex items-center gap-2">
+            <span className="text-[#A100FF] text-xl font-black">&gt;</span>
+            <span className="text-white text-base font-bold tracking-tight">NexxusHuman-AI</span>
           </div>
 
-          <p className="text-xs text-white/35">
-            © 2026 NexxusHuman-AI. All rights reserved.
-          </p>
-
-          {/* Social links */}
-          <div className="flex items-center gap-5">
-            {["LinkedIn", "YouTube", "Spotify", "Instagram"].map((social) => (
-              <a
-                key={social}
-                href="#"
-                className="text-white/35 hover:text-[#0070AD] transition-colors text-xs font-medium"
-              >
-                {social}
+          {/* Links */}
+          <div className="flex flex-wrap gap-6">
+            {["Privacy", "Terms", "Accessibility", "Careers", "Contact"].map((link) => (
+              <a key={link} href="#" className="text-xs text-white/40 hover:text-white/70 transition-colors font-medium">
+                {link}
               </a>
             ))}
           </div>
+        </div>
 
-          {/* Legal */}
-          <div className="flex items-center gap-6 pt-4 border-t border-white/5 w-full justify-center">
-            <a href="#" className="text-xs text-white/30 hover:text-white/60 transition-colors">
-              Privacy Policy
-            </a>
-            <a href="#" className="text-xs text-white/30 hover:text-white/60 transition-colors">
-              Terms of Use
-            </a>
-          </div>
+        <div className="mt-8 pt-6 border-t border-white/5">
+          <p className="text-[11px] text-white/30">
+            © 2026 NexxusHuman-AI. All rights reserved. Transforming enterprises into Agentic Organizations.
+          </p>
         </div>
       </div>
     </footer>
   );
 }
 
-// ===== PÁGINA PRINCIPAL =====
+/* ===== PÁGINA PRINCIPAL ===== */
 export default function Home() {
   return (
-    <div className="min-h-screen bg-[#051C2C] text-white overflow-x-hidden">
+    <div className="min-h-screen bg-black text-white overflow-x-hidden">
       <Navbar />
       <HeroSection />
-      <LogosCarousel />
-      <HighlightSection />
-      <ClientsSection />
-      <OrgChartSection />
-      <MethodologySection />
+      <InsightsSection />
+      <ServicesSection />
+      <ValueSection />
       <CasesSection />
+      <QuoteSection />
+      <EvolutionSection />
       <CTASection />
-      <ContentSection />
       <Footer />
     </div>
   );

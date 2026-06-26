@@ -3,17 +3,17 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* ===== NexxusHuman-AI Design System =====
- * Inspiração: McKinsey corporate elegance + Dalton Lab dark theme
- * Cores: Navy profundo, branco, azul corporativo
- * Tipografia: Playfair Display (serif) + Inter (sans-serif)
- * ========================================= */
+/* ===== NexxusHuman-AI — Accenture-Inspired Design System =====
+ * Cores: Preto puro, branco, violeta elétrico (#A100FF)
+ * Tipografia: Inter (sans-serif, ultra-bold para headlines)
+ * Estilo: Bold, alto contraste, sem bordas arredondadas
+ * ============================================================= */
 
 @theme inline {
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -33,42 +33,31 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
   --font-sans: "Inter", system-ui, -apple-system, sans-serif;
-  --font-serif: "Playfair Display", Georgia, serif;
   --font-mono: "JetBrains Mono", monospace;
 }
 
 :root {
-  --radius: 0.5rem;
-  --background: oklch(0.13 0.02 240);
-  --foreground: oklch(0.98 0 0);
-  --card: oklch(0.16 0.02 240);
-  --card-foreground: oklch(0.98 0 0);
-  --popover: oklch(0.16 0.02 240);
-  --popover-foreground: oklch(0.98 0 0);
-  --primary: oklch(0.6 0.15 240);
-  --primary-foreground: oklch(0.98 0 0);
-  --secondary: oklch(0.2 0.02 240);
-  --secondary-foreground: oklch(0.85 0 0);
-  --muted: oklch(0.2 0.015 240);
-  --muted-foreground: oklch(0.65 0.01 240);
-  --accent: oklch(0.6 0.15 240);
-  --accent-foreground: oklch(0.98 0 0);
+  --radius: 0rem;
+  --background: oklch(0 0 0);
+  --foreground: oklch(1 0 0);
+  --card: oklch(0.07 0 0);
+  --card-foreground: oklch(1 0 0);
+  --popover: oklch(0.07 0 0);
+  --popover-foreground: oklch(1 0 0);
+  --primary: oklch(0.5 0.3 300);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.1 0 0);
+  --secondary-foreground: oklch(0.8 0 0);
+  --muted: oklch(0.12 0 0);
+  --muted-foreground: oklch(0.55 0 0);
+  --accent: oklch(0.5 0.3 300);
+  --accent-foreground: oklch(1 0 0);
   --destructive: oklch(0.6 0.2 25);
-  --destructive-foreground: oklch(0.98 0 0);
+  --destructive-foreground: oklch(1 0 0);
   --border: oklch(1 0 0 / 8%);
   --input: oklch(1 0 0 / 12%);
-  --ring: oklch(0.6 0.15 240);
-  --chart-1: oklch(0.6 0.15 240);
-  --chart-2: oklch(0.5 0.12 240);
-  --chart-3: oklch(0.7 0.1 240);
-  --chart-4: oklch(0.4 0.08 240);
-  --chart-5: oklch(0.8 0.05 240);
+  --ring: oklch(0.5 0.3 300);
 }
 
 @layer base {
@@ -119,22 +108,27 @@
     .container {
       padding-left: 2.5rem;
       padding-right: 2.5rem;
-      max-width: 1280px;
+      max-width: 1400px;
     }
   }
 }
 
-/* Custom scrollbar for dark theme */
+/* Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #051C2C;
+  background: #000;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.15);
-  border-radius: 4px;
+  background: rgba(161,0,255,0.3);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255,255,255,0.25);
+  background: rgba(161,0,255,0.5);
+}
+
+/* Selection */
+::selection {
+  background: rgba(161,0,255,0.3);
+  color: white;
 }
