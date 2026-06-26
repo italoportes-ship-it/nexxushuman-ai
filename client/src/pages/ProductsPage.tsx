@@ -69,6 +69,9 @@ export default function ProductsPage() {
         {/* Recursos */}
         <ResourcesSection lang={lang} />
 
+        {/* Tabela de Preços */}
+        <PricingSection lang={lang} />
+
         {/* CTA Final */}
         <FinalCTASection lang={lang} />
       </main>
@@ -190,18 +193,21 @@ function FeaturesTabsSection({ lang }: { lang: string }) {
       title: "Crie e orquestre fábricas de agentes inteligentes",
       desc: "Pacote completo de recursos para criar fábricas de 20 a 100 agentes especializados que executam processos completos de ponta a ponta. Inclui frameworks de orquestração, templates pré-configurados e monitoramento em tempo real.",
       features: ["Orquestração multi-agente", "Templates por setor", "Monitoramento em tempo real", "Governança embutida"],
+      link: "/produtos/fabricas-de-agentes",
     },
     {
       label: "Governança Contínua",
       title: "Governança integrada ao ciclo de vida dos agentes",
       desc: "Sistema de governança contínua que monitora, audita e controla agentes em operação. Políticas de intervenção humana configuráveis, alertas de exceção e dashboards executivos em tempo real.",
       features: ["Políticas de supervisão", "Auditoria automática", "Alertas inteligentes", "Compliance integrado"],
+      link: "/produtos/governanca",
     },
     {
       label: "Escala Empresarial",
       title: "Escale de um domínio para toda a organização",
       desc: "Arquitetura projetada para escalar de projetos-piloto para operação enterprise. Protocolos agente-para-agente, integração com sistemas legados e deploy incremental sem downtime.",
       features: ["Protocolos A2A", "Integração legados", "Deploy zero-downtime", "Multi-ambiente"],
+      link: "/produtos/escala-empresarial",
     },
   ] : [
     {
@@ -209,18 +215,21 @@ function FeaturesTabsSection({ lang }: { lang: string }) {
       title: "Create and orchestrate intelligent agent factories",
       desc: "Complete resource package for creating factories of 20 to 100 specialized agents that execute complete end-to-end processes. Includes orchestration frameworks, pre-configured templates and real-time monitoring.",
       features: ["Multi-agent orchestration", "Sector templates", "Real-time monitoring", "Embedded governance"],
+      link: "/produtos/fabricas-de-agentes",
     },
     {
       label: "Continuous Governance",
       title: "Governance integrated into the agent lifecycle",
       desc: "Continuous governance system that monitors, audits and controls agents in operation. Configurable human intervention policies, exception alerts and real-time executive dashboards.",
       features: ["Supervision policies", "Automatic auditing", "Smart alerts", "Integrated compliance"],
+      link: "/produtos/governanca",
     },
     {
       label: "Enterprise Scale",
       title: "Scale from one domain to the entire organization",
       desc: "Architecture designed to scale from pilot projects to enterprise operation. Agent-to-agent protocols, legacy system integration and incremental deploy without downtime.",
       features: ["A2A protocols", "Legacy integration", "Zero-downtime deploy", "Multi-environment"],
+      link: "/produtos/escala-empresarial",
     },
   ];
 
@@ -268,7 +277,7 @@ function FeaturesTabsSection({ lang }: { lang: string }) {
           <div>
             <h3 className="text-2xl font-bold mb-4">{tabs[activeTab].title}</h3>
             <p className="text-[15px] text-white/55 leading-relaxed mb-8">{tabs[activeTab].desc}</p>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-3 mb-6">
               {tabs[activeTab].features.map((f, i) => (
                 <div key={i} className="flex items-center gap-2 text-sm text-white/70">
                   <CheckCircle2 className="w-4 h-4 text-[#A100FF] shrink-0" />
@@ -276,6 +285,9 @@ function FeaturesTabsSection({ lang }: { lang: string }) {
                 </div>
               ))}
             </div>
+            <Link href={tabs[activeTab].link} className="inline-flex items-center gap-2 text-sm font-semibold text-[#A100FF] hover:text-white transition-colors">
+              {lang === "pt" ? "Saiba mais" : "Learn more"} <ArrowRight className="w-3 h-3" />
+            </Link>
           </div>
           <div className="bg-[#111] border border-white/5 p-8 flex items-center justify-center min-h-[250px]">
             <div className="text-center">
@@ -395,10 +407,180 @@ function ResourcesSection({ lang }: { lang: string }) {
   );
 }
 
+/* ===== Tabela de Preços ===== */
+function PricingSection({ lang }: { lang: string }) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-80px" });
+
+  const plans = lang === "pt" ? [
+    {
+      name: "Starter",
+      price: "Sob consulta",
+      desc: "Para empresas iniciando a jornada agêntica",
+      highlight: false,
+      features: [
+        "1 fábrica de agentes (até 20 agentes)",
+        "1 domínio de processo",
+        "Dashboard de monitoramento básico",
+        "Suporte por e-mail",
+        "Templates padrão",
+        "Relatórios mensais",
+      ],
+      cta: "Começar avaliação",
+    },
+    {
+      name: "Professional",
+      price: "Sob consulta",
+      desc: "Para empresas escalando a transformação",
+      highlight: true,
+      features: [
+        "Até 3 fábricas (até 50 agentes cada)",
+        "Múltiplos domínios de processo",
+        "Governança contínua completa",
+        "Suporte prioritário 24/7",
+        "Templates por setor + customizados",
+        "Analytics avançado em tempo real",
+        "Integrações com sistemas legados",
+        "Centro de Excelência assistido",
+      ],
+      cta: "Falar com especialista",
+    },
+    {
+      name: "Enterprise",
+      price: "Personalizado",
+      desc: "Para organizações em transformação total",
+      highlight: false,
+      features: [
+        "Fábricas ilimitadas (até 100+ agentes)",
+        "Todos os domínios da organização",
+        "Governança enterprise + compliance",
+        "Gerente de sucesso dedicado",
+        "Protocolos A2A cross-departamento",
+        "SLA 99.99% com suporte premium",
+        "Deploy multi-ambiente (cloud/on-prem)",
+        "Programa de requalificação incluído",
+        "Consultoria estratégica trimestral",
+      ],
+      cta: "Agendar demonstração",
+    },
+  ] : [
+    {
+      name: "Starter",
+      price: "Contact us",
+      desc: "For companies starting the agentic journey",
+      highlight: false,
+      features: [
+        "1 agent factory (up to 20 agents)",
+        "1 process domain",
+        "Basic monitoring dashboard",
+        "Email support",
+        "Standard templates",
+        "Monthly reports",
+      ],
+      cta: "Start assessment",
+    },
+    {
+      name: "Professional",
+      price: "Contact us",
+      desc: "For companies scaling transformation",
+      highlight: true,
+      features: [
+        "Up to 3 factories (up to 50 agents each)",
+        "Multiple process domains",
+        "Complete continuous governance",
+        "24/7 priority support",
+        "Sector + custom templates",
+        "Advanced real-time analytics",
+        "Legacy system integrations",
+        "Assisted Center of Excellence",
+      ],
+      cta: "Talk to specialist",
+    },
+    {
+      name: "Enterprise",
+      price: "Custom",
+      desc: "For organizations in full transformation",
+      highlight: false,
+      features: [
+        "Unlimited factories (100+ agents)",
+        "All organization domains",
+        "Enterprise governance + compliance",
+        "Dedicated success manager",
+        "Cross-department A2A protocols",
+        "99.99% SLA with premium support",
+        "Multi-environment deploy (cloud/on-prem)",
+        "Reskilling program included",
+        "Quarterly strategic consulting",
+      ],
+      cta: "Schedule demo",
+    },
+  ];
+
+  return (
+    <section ref={ref} id="precos" className="py-20 bg-black border-t border-white/5">
+      <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={isInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6 }}>
+          <h2 className="text-3xl sm:text-4xl font-black mb-4">
+            {lang === "pt" ? "Planos e Preços" : "Plans & Pricing"}
+          </h2>
+          <p className="text-base text-white/50 mb-12 max-w-[600px]">
+            {lang === "pt"
+              ? "Escolha o plano ideal para o estágio da sua transformação agêntica."
+              : "Choose the ideal plan for your agentic transformation stage."}
+          </p>
+        </motion.div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-[2px]">
+          {plans.map((plan, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 20 }}
+              animate={isInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.5, delay: i * 0.1 }}
+              className={`p-8 flex flex-col ${
+                plan.highlight
+                  ? "bg-[#A100FF]/10 border border-[#A100FF]/30"
+                  : "bg-[#111]"
+              }`}
+            >
+              {plan.highlight && (
+                <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#A100FF] mb-3">
+                  {lang === "pt" ? "Mais popular" : "Most popular"}
+                </span>
+              )}
+              <h3 className="text-2xl font-black mb-1">{plan.name}</h3>
+              <p className="text-sm text-white/50 mb-4">{plan.desc}</p>
+              <span className="text-lg font-bold text-[#A100FF] mb-6">{plan.price}</span>
+              <ul className="space-y-3 mb-8 flex-1">
+                {plan.features.map((f, j) => (
+                  <li key={j} className="flex items-start gap-2 text-sm text-white/70">
+                    <CheckCircle2 className="w-4 h-4 text-[#A100FF] shrink-0 mt-0.5" />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <Link
+                href="/contact"
+                className={`w-full inline-flex items-center justify-center gap-2 py-3.5 font-semibold text-[15px] transition-colors ${
+                  plan.highlight
+                    ? "bg-[#A100FF] text-white hover:bg-[#8800DD]"
+                    : "border border-white/20 text-white hover:border-white/40"
+                }`}
+              >
+                {plan.cta} <ArrowRight className="w-4 h-4" />
+              </Link>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ===== CTA Final — "Dê o próximo passo" ===== */
 function FinalCTASection({ lang }: { lang: string }) {
   return (
-    <section id="precos" className="py-20 bg-[#0a0a0a] border-t border-white/5">
+    <section className="py-20 bg-[#0a0a0a] border-t border-white/5">
       <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
         <h2 className="text-3xl sm:text-4xl font-black mb-4">
           {lang === "pt" ? "Dê o próximo passo" : "Take the next step"}
