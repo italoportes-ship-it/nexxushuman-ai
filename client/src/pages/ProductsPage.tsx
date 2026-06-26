@@ -101,11 +101,28 @@ function HeroProduct({ lang }: { lang: string }) {
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
             <Link href="/diagnostico/iniciar" className="inline-flex items-center gap-2 px-7 py-3.5 bg-[#A100FF] text-white font-semibold text-[15px] hover:bg-[#8800DD] transition-colors">
-              {lang === "pt" ? "Comece sua avaliação gratuita" : "Start your free assessment"} <ArrowRight className="w-4 h-4" />
+              {lang === "pt" ? "Comece sua avalia\u00e7\u00e3o gratuita" : "Start your free assessment"} <ArrowRight className="w-4 h-4" />
             </Link>
             <Link href="/diagnostico" className="inline-flex items-center gap-2 px-7 py-3.5 border border-white/20 text-white font-semibold text-[15px] hover:border-white/40 transition-colors">
-              {lang === "pt" ? "Faça o diagnóstico" : "Take the diagnostic"} <ArrowRight className="w-4 h-4" />
+              {lang === "pt" ? "Fa\u00e7a o diagn\u00f3stico" : "Take the diagnostic"} <ArrowRight className="w-4 h-4" />
             </Link>
+          </div>
+
+          {/* V\u00eddeo Demo */}
+          <div className="mt-12 relative max-w-[900px]">
+            <div className="relative border border-white/10 bg-[#111] overflow-hidden">
+              <video
+                className="w-full aspect-video object-cover"
+                controls
+                poster="/manus-storage/presenter-reference_c104f2db.png"
+                preload="metadata"
+              >
+                <source src="/manus-storage/nexxus-demo-video_6e08c704.mp4" type="video/mp4" />
+              </video>
+              <div className="absolute bottom-3 left-3 bg-black/70 px-3 py-1 text-[10px] text-white/60 font-medium">
+                {lang === "pt" ? "Legendas dispon\u00edveis em ingl\u00eas" : "Subtitles available in English"}
+              </div>
+            </div>
           </div>
         </motion.div>
       </div>
