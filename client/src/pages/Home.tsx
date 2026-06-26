@@ -3,7 +3,7 @@
  * Conteúdo: Plano de consultoria em organização agêntica
  * ===================================================== */
 
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { motion, useInView, useScroll, useTransform } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link } from "wouter";
@@ -66,10 +66,16 @@ function HeroSection() {
           <div className="mt-12 max-w-xl">
             <h2 className="text-xl sm:text-2xl font-bold text-white mb-4">{t("hero.subtitle")}</h2>
             <p className="text-base text-white/60 leading-relaxed">{t("hero.desc")}</p>
-            <a href="#services" className="inline-flex items-center gap-2 mt-8 text-[15px] font-bold text-white hover:text-[#A100FF] transition-colors group">
-              {t("hero.cta")}
-              <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-[#A100FF] text-white text-sm group-hover:translate-x-1 transition-transform">&gt;</span>
-            </a>
+            <div className="flex flex-col sm:flex-row gap-4 mt-10">
+              {/* CTA PRINCIPAL: Diagnóstico - bem visível */}
+              <Link href="/diagnostico" className="inline-flex items-center justify-center gap-3 px-8 py-4 bg-[#A100FF] text-white font-bold text-[15px] hover:bg-[#8800DD] transition-all duration-200 active:scale-[0.97] group">
+                {lang === "pt" ? "Fazer Diagn\u00f3stico Gratuito" : "Free AI Diagnostic"}
+                <span className="group-hover:translate-x-1 transition-transform">&gt;</span>
+              </Link>
+              <a href="#services" className="inline-flex items-center justify-center gap-2 px-8 py-4 border border-white/20 text-white font-bold text-[15px] hover:border-white/40 transition-colors">
+                {t("hero.cta")}
+              </a>
+            </div>
           </div>
         </motion.div>
       </motion.div>
@@ -337,6 +343,31 @@ function Footer() {
 }
 
 /* ===== PÁGINA PRINCIPAL ===== */
+/* ===== BANNER FLUTUANTE — Diagnóstico ===== */
+function FloatingDiagnosticBanner() {
+  const { lang } = useLanguage();
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setVisible(window.scrollY > 600);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  if (!visible) return null;
+
+  return (
+    <div className="fixed bottom-0 left-0 right-0 z-40 bg-[#A100FF] py-3 px-6 flex items-center justify-center gap-4 shadow-lg shadow-[#A100FF]/20">
+      <span className="text-white text-sm font-semibold hidden sm:inline">
+        {lang === "pt" ? "\u2728 Descubra o potencial de IA da sua empresa em 5 minutos" : "\u2728 Discover your company's AI potential in 5 minutes"}
+      </span>
+      <Link href="/diagnostico" className="inline-flex items-center gap-2 px-5 py-2 bg-white text-black font-bold text-sm hover:bg-white/90 transition-colors">
+        {lang === "pt" ? "Fazer Diagn\u00f3stico" : "Take Diagnostic"} &gt;
+      </Link>
+    </div>
+  );
+}
+
 export default function Home() {
   return (
     <div className="min-h-screen bg-black text-white overflow-x-hidden">
@@ -350,6 +381,7 @@ export default function Home() {
       <EvolutionSection />
       <CTASection />
       <Footer />
+      <FloatingDiagnosticBanner />
     </div>
   );
 }
