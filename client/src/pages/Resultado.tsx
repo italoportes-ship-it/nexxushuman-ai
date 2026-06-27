@@ -326,17 +326,29 @@ export default function Resultado() {
   useEffect(() => {
     const stored = localStorage.getItem("diagnostico-data");
     if (stored) {
-      const parsed = JSON.parse(stored) as DiagnosticoData;
-      setData(parsed);
-      setScores(calcularScores(parsed));
-      setRecomendacoes(gerarRecomendacoes(parsed));
-      setTimeout(() => setAnimateScores(true), 300);
+      try {
+        const parsed = JSON.parse(stored) as DiagnosticoData;
+        setData(parsed);
+        setScores(calcularScores(parsed));
+        setRecomendacoes(gerarRecomendacoes(parsed));
+        setTimeout(() => setAnimateScores(true), 300);
+      } catch (e) {
+        console.error("Erro ao parsear dados:", e);
+        navigate("/diagnostico");
+      }
     } else {
-      navigate("/");
+      navigate("/diagnostico");
     }
-  }, [navigate]);
+  }, []);
 
-  if (!data) return null;
+  if (!data) return (
+    <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="text-center">
+        <div className="w-8 h-8 border-2 border-[#A100FF] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+        <p className="text-white/50 text-sm">Carregando diagn\u00f3stico...</p>
+      </div>
+    </div>
+  );
 
   const scoreGeral = Math.round(scores.reduce((acc, s) => acc + s.score, 0) / scores.length);
 

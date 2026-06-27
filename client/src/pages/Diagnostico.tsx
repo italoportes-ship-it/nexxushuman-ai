@@ -99,14 +99,14 @@ function DiagnosticoContent() {
           </div>
         </main>
 
-        {/* Footer com navegação */}
-        <footer className="px-6 lg:px-12 py-5 border-t border-border/40 bg-sidebar/50 backdrop-blur-sm">
+        {/* Footer com navegação - FIXO no rodapé */}
+        <footer className="sticky bottom-0 px-6 lg:px-12 py-5 border-t border-border/40 bg-background/95 backdrop-blur-sm z-20">
           <div className="max-w-2xl mx-auto flex items-center justify-between">
             <Button
               variant="outline"
               onClick={handlePrev}
               disabled={currentStep === 0}
-              className="font-display font-medium gap-2 transition-all duration-200 active:scale-[0.97]"
+              className="font-medium gap-2 transition-all duration-200 active:scale-[0.97]"
             >
               <ArrowLeft className="w-4 h-4" />
               Anterior
@@ -115,10 +115,10 @@ function DiagnosticoContent() {
             <Button
               onClick={handleNext}
               disabled={!canAdvance}
-              className={`font-display font-semibold gap-2 transition-all duration-200 active:scale-[0.97] ${
+              className={`font-semibold gap-2 transition-all duration-200 active:scale-[0.97] ${
                 currentStep === 4
-                  ? "bg-amber text-background hover:bg-amber/90"
-                  : "bg-primary text-primary-foreground hover:bg-primary/90"
+                  ? "bg-[#A100FF] text-white hover:bg-[#8800DD]"
+                  : "bg-[#A100FF] text-white hover:bg-[#8800DD]"
               }`}
             >
               {currentStep === 4 ? (
