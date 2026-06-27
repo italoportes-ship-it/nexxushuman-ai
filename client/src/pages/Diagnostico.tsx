@@ -58,27 +58,31 @@ function DiagnosticoContent() {
 
       {/* Conteúdo Principal */}
       <div className="flex-1 flex flex-col min-h-screen">
-        {/* Header Mobile */}
-        <header className="lg:hidden px-4 py-4 border-b border-border/40 bg-sidebar">
+        {/* Header Mobile com barra de progresso aprimorada */}
+        <header className="lg:hidden px-4 py-4 border-b border-border/40 bg-background">
           <div className="flex items-center justify-between mb-3">
             <Link href="/" className="flex items-center gap-2">
               <span className="text-[#A100FF] text-xl font-black">&gt;</span>
               <span className="font-bold text-sm">NexxusHuman-AI</span>
             </Link>
-            <span className="font-mono text-xs text-muted-foreground">
-              {currentStep + 1}/5
+            <span className="text-xs font-semibold text-[#A100FF]">
+              Etapa {currentStep + 1} de 5
             </span>
           </div>
-          {/* Progress bar mobile */}
-          <div className="flex gap-1.5">
-            {steps.map((_, i) => (
+          {/* Barra de progresso visual - mobile */}
+          <div className="flex gap-1">
+            {steps.map((step, i) => (
               <div
                 key={i}
-                className={`h-1 flex-1 rounded-full transition-colors duration-300 ${
-                  i <= currentStep ? "bg-primary" : "bg-border"
+                className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${
+                  i < currentStep ? "bg-[#A100FF]" : i === currentStep ? "bg-[#A100FF] animate-pulse" : "bg-white/10"
                 }`}
               />
             ))}
+          </div>
+          <div className="flex justify-between mt-2">
+            <span className="text-[10px] text-white/40">{steps[currentStep]?.title}</span>
+            <span className="text-[10px] text-white/40">{steps[currentStep]?.subtitle}</span>
           </div>
         </header>
 

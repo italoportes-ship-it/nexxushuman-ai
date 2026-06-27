@@ -1,4 +1,12 @@
-import { createContext, useContext, useState, type ReactNode } from "react";
+/* ===== Contexto do Diagnóstico =====
+ * ALTERADO: 
+ * - Apenas step 1 é obrigatório (nome + setor + porte)
+ * - Steps 2-5 podem ser pulados (sempre retornam true)
+ * - Progresso salvo automaticamente no localStorage a cada mudança
+ * - Ao abrir, restaura progresso parcial salvo
+ * ===================================== */
+
+import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 
 export interface EmpresaInfo {
   nome: string;
@@ -72,11 +80,37 @@ const initialData: DiagnosticoData = {
   dores: { maioresDores: [], processosCriticos: [], errosFrequentes: [], tempoDecisao: "", satisfacaoCliente: "" },
 };
 
+const STORAGE_KEY = "diagnostico-progress";
+
+// Restaurar progresso do localStorage
+function loadSavedProgress(): { data: DiagnosticoData; step: number } {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      return { data: parsed.data || initialData, step: parsed.step || 0 };
+    }
+  } catch (e) {
+    // Silently fail
+  }
+  return { data: initialData, step: 0 };
+}
+
 const DiagnosticoContext = createContext<DiagnosticoContextType | undefined>(undefined);
 
 export function DiagnosticoProvider({ children }: { children: ReactNode }) {
-  const [data, setData] = useState<DiagnosticoData>(initialData);
-  const [currentStep, setCurrentStep] = useState(0);
+  const saved = loadSavedProgress();
+  const [data, setData] = useState<DiagnosticoData>(saved.data);
+  const [currentStep, setCurrentStep] = useState(saved.step);
+
+  // ALTERADO: Salvar progresso no localStorage a cada mudança
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ data, step: currentStep }));
+    } catch (e) {
+      // Silently fail
+    }
+  }, [data, currentStep]);
 
   const updateEmpresa = (info: Partial<EmpresaInfo>) => {
     setData((prev) => ({ ...prev, empresa: { ...prev.empresa, ...info } }));
@@ -98,18 +132,24 @@ export function DiagnosticoProvider({ children }: { children: ReactNode }) {
     setData((prev) => ({ ...prev, dores: { ...prev.dores, ...info } }));
   };
 
+  // ALTERADO: Apenas step 1 é obrigatório, demais podem ser pulados
   const isStepComplete = (step: number): boolean => {
     switch (step) {
       case 0:
+        // Obrigatório: nome, setor e porte
         return !!(data.empresa.nome && data.empresa.setor && data.empresa.porte);
       case 1:
-        return data.processos.areas.length > 0 && !!data.processos.horasManual;
+        // Opcional: pode pular (mas recomendado preencher)
+        return true;
       case 2:
-        return !!(data.maturidade.nivelDigital && data.maturidade.experienciaIA);
+        // Opcional: pode pular
+        return true;
       case 3:
-        return data.objetivos.prioridades.length > 0 && !!data.objetivos.prazo;
+        // Opcional: pode pular
+        return true;
       case 4:
-        return data.dores.maioresDores.length > 0;
+        // Opcional: pode pular
+        return true;
       default:
         return false;
     }
@@ -118,6 +158,11 @@ export function DiagnosticoProvider({ children }: { children: ReactNode }) {
   const resetDiagnostico = () => {
     setData(initialData);
     setCurrentStep(0);
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch (e) {
+      // Silently fail
+    }
   };
 
   return (
