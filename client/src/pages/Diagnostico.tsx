@@ -12,6 +12,8 @@ import StepMaturidade from "@/components/steps/StepMaturidade";
 import StepObjetivos from "@/components/steps/StepObjetivos";
 import StepDores from "@/components/steps/StepDores";
 import StepSaude, { initialSaudeData, type SaudeData } from "@/components/steps/StepSaude";
+import StepSetorial, { initialSetorialData, type SetorialData } from "@/components/steps/StepSetorial";
+import StepUpload from "@/components/steps/StepUpload";
 import ProgressSidebar from "@/components/ProgressSidebar";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, Sparkles } from "lucide-react";
@@ -26,24 +28,37 @@ const stepsDefault = [
 
 const stepsSaude = [
   { id: 0, title: "Empresa", subtitle: "Perfil e contexto" },
-  { id: 1, title: "Sobre Você", subtitle: "Dados profissionais" },
-  { id: 2, title: "Serviços", subtitle: "Atendimento e demandas" },
+  { id: 1, title: "Sobre Voc\u00ea", subtitle: "Dados profissionais" },
+  { id: 2, title: "Servi\u00e7os", subtitle: "Atendimento e demandas" },
   { id: 3, title: "Processos", subtitle: "Dores operacionais" },
-  { id: 4, title: "IA", subtitle: "Expectativas e regras" },
+  { id: 4, title: "Materiais", subtitle: "Upload e finaliza\u00e7\u00e3o" },
 ];
 
 function DiagnosticoContent() {
   const { currentStep, setCurrentStep, isStepComplete, data } = useDiagnostico();
   const [, navigate] = useLocation();
   const [saudeData, setSaudeData] = useState<SaudeData>(initialSaudeData);
+  const [setorialData, setSetorialData] = useState<SetorialData>(initialSetorialData);
+  const [uploadFiles, setUploadFiles] = useState<any[]>([]);
+  const [uploadObs, setUploadObs] = useState("");
   const [saudeSection, setSaudeSection] = useState(0);
 
-  // Detectar se o setor é Saúde
-  const isSaude = data.empresa.setor === "Saúde";
-  const steps = isSaude ? stepsSaude : stepsDefault;
+  // Detectar setor
+  const isSaude = data.empresa.setor === "Sa\u00fade";
+  const isSetorial = ["Servi\u00e7os Financeiros", "Varejo / E-commerce", "Ind\u00fastria / Manufatura"].includes(data.empresa.setor);
+  
+  const stepsSetorial = [
+    { id: 0, title: "Empresa", subtitle: "Perfil e contexto" },
+    { id: 1, title: "Neg\u00f3cio", subtitle: "Perfil setorial" },
+    { id: 2, title: "Sistemas", subtitle: "Processos e ferramentas" },
+    { id: 3, title: "Dores", subtitle: "Oportunidades" },
+    { id: 4, title: "IA", subtitle: "Expectativas" },
+  ];
 
-  const canAdvance = isSaude
-    ? (currentStep === 0 ? isStepComplete(0) : true) // Step 1 obrigatório, demais opcionais
+  const steps = isSaude ? stepsSaude : isSetorial ? stepsSetorial : stepsDefault;
+
+  const canAdvance = (isSaude || isSetorial)
+    ? (currentStep === 0 ? isStepComplete(0) : true)
     : isStepComplete(currentStep);
 
   const handleNext = () => {
@@ -55,42 +70,24 @@ function DiagnosticoContent() {
     } else {
       // Salvar dados e navegar para resultado
       if (isSaude) {
-        // Para Saúde, salvar dados combinados
         const combinedData = {
           ...data,
           saudeSpecific: saudeData,
-          processos: {
-            ...data.processos,
-            areas: ["Atendimento ao Cliente / Suporte", "RH / Gestão de Pessoas"],
-            horasManual: saudeData.tempoAdministrativo === "3h+" ? "mais-100" : saudeData.tempoAdministrativo === "2-3h" ? "60-100" : "30-60",
-            gargalos: saudeData.doresOperacionais.map(d => {
-              if (d.includes("mensagens")) return "Atendimento a clientes repetitivo";
-              if (d.includes("Agendamento")) return "Aprovações em cadeia demoradas";
-              if (d.includes("Cobranças")) return "Conciliação de dados entre sistemas";
-              if (d.includes("Triagem")) return "Classificação e triagem de documentos";
-              return "Entrada manual de dados repetitiva";
-            }),
-          },
-          maturidade: {
-            ...data.maturidade,
-            nivelDigital: "basico",
-            experienciaIA: "nenhuma",
-            urgencia: "urgente",
-          },
-          objetivos: {
-            ...data.objetivos,
-            prioridades: saudeData.expectativasIA.length > 0
-              ? ["Redução de custos operacionais", "Personalização em escala"]
-              : ["Redução de custos operacionais"],
-            prazo: "3-meses",
-          },
-          dores: {
-            ...data.dores,
-            maioresDores: ["Processos manuais consumindo tempo excessivo", "Dificuldade em escalar operações"],
-            processosCriticos: saudeData.expectativasIA.includes("Agendar/remarcar sessões")
-              ? ["Atendimento e suporte (L1/L2)", "Onboarding de clientes"]
-              : ["Atendimento e suporte (L1/L2)"],
-          },
+          uploadFiles: uploadFiles.map(f => f.name),
+          processos: { ...data.processos, areas: ["Atendimento ao Cliente / Suporte", "RH / Gest\u00e3o de Pessoas"], horasManual: saudeData.tempoAdministrativo === "3h+" ? "mais-100" : saudeData.tempoAdministrativo === "2-3h" ? "60-100" : "30-60", gargalos: saudeData.doresOperacionais.map(d => { if (d.includes("mensagens")) return "Atendimento a clientes repetitivo"; if (d.includes("Agendamento")) return "Aprova\u00e7\u00f5es em cadeia demoradas"; if (d.includes("Cobran\u00e7as")) return "Concilia\u00e7\u00e3o de dados entre sistemas"; if (d.includes("Triagem")) return "Classifica\u00e7\u00e3o e triagem de documentos"; return "Entrada manual de dados repetitiva"; }) },
+          maturidade: { ...data.maturidade, nivelDigital: "basico", experienciaIA: "nenhuma", urgencia: "urgente" },
+          objetivos: { ...data.objetivos, prioridades: ["Redu\u00e7\u00e3o de custos operacionais", "Personaliza\u00e7\u00e3o em escala"], prazo: "3-meses" },
+          dores: { ...data.dores, maioresDores: ["Processos manuais consumindo tempo excessivo", "Dificuldade em escalar opera\u00e7\u00f5es"], processosCriticos: ["Atendimento e suporte (L1/L2)", "Onboarding de clientes"] },
+        };
+        localStorage.setItem("diagnostico-data", JSON.stringify(combinedData));
+      } else if (isSetorial) {
+        const combinedData = {
+          ...data,
+          setorialSpecific: setorialData,
+          processos: { ...data.processos, areas: setorialData.processosCore.length > 0 ? setorialData.processosCore.slice(0, 3).map(() => "Atendimento ao Cliente / Suporte") : ["Atendimento ao Cliente / Suporte"], horasManual: "30-60", gargalos: setorialData.doresSetoriais.map(d => "Entrada manual de dados repetitiva") },
+          maturidade: { ...data.maturidade, nivelDigital: "intermediario", experienciaIA: "pilotos", urgencia: "urgente" },
+          objetivos: { ...data.objetivos, prioridades: setorialData.expectativasIA.slice(0, 3).length > 0 ? ["Redu\u00e7\u00e3o de custos operacionais"] : ["Redu\u00e7\u00e3o de custos operacionais"], prazo: "3-meses" },
+          dores: { ...data.dores, maioresDores: setorialData.doresSetoriais.length > 0 ? ["Processos manuais consumindo tempo excessivo", "Dificuldade em escalar opera\u00e7\u00f5es"] : ["Processos manuais consumindo tempo excessivo"], processosCriticos: ["Atendimento e suporte (L1/L2)"] },
         };
         localStorage.setItem("diagnostico-data", JSON.stringify(combinedData));
       } else {
@@ -112,7 +109,19 @@ function DiagnosticoContent() {
 
   // Componentes dos steps
   const renderStep = () => {
+    // Setor Saúde: formulário especializado (steps 1-4) + upload (step 5 = currentStep 4 com seção 4)
     if (isSaude && currentStep > 0) {
+      if (currentStep === 4) {
+        // Último step: upload de materiais
+        return (
+          <StepUpload
+            files={uploadFiles}
+            onFilesChange={setUploadFiles}
+            observacoes={uploadObs}
+            onObservacoesChange={setUploadObs}
+          />
+        );
+      }
       return (
         <StepSaude
           currentSection={currentStep - 1}
@@ -123,6 +132,19 @@ function DiagnosticoContent() {
       );
     }
 
+    // Setores Financeiro, Varejo, Indústria: formulário setorial
+    if (isSetorial && currentStep > 0) {
+      return (
+        <StepSetorial
+          setor={data.empresa.setor}
+          currentSection={currentStep - 1}
+          data={setorialData}
+          onDataChange={(partial) => setSetorialData(prev => ({ ...prev, ...partial }))}
+        />
+      );
+    }
+
+    // Default: formulário genérico
     const defaultSteps = [
       <StepEmpresa key="empresa" />,
       <StepProcessos key="processos" />,
