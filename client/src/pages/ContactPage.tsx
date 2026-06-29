@@ -11,6 +11,7 @@ import { motion } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link } from "wouter";
 import { toast } from "sonner";
+import { trpc } from "@/lib/trpc";
 import emailjs from "@emailjs/browser";
 
 // ===== CONFIGURAÇÃO EMAILJS =====
@@ -32,31 +33,34 @@ export default function ContactPage() {
     message: "",
   });
 
+  // Mutation para salvar lead no backend
+  const submitLead = trpc.leads.submit.useMutation();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSending(true);
 
     try {
-      // Tenta enviar via EmailJS
+      // 1. Salvar no backend (banco de dados)
+      await submitLead.mutateAsync({
+        nome: formData.from_name,
+        email: formData.from_email,
+        empresa: formData.company || undefined,
+        cargo: formData.role || undefined,
+        mensagem: formData.message || undefined,
+        origem: "contato",
+      });
+
+      // 2. Tentar enviar via EmailJS tamb\u00e9m (se configurado)
       if (EMAILJS_PUBLIC_KEY !== "YOUR_PUBLIC_KEY" && formRef.current) {
-        await emailjs.sendForm(
-          EMAILJS_SERVICE_ID,
-          EMAILJS_TEMPLATE_ID,
-          formRef.current,
-          EMAILJS_PUBLIC_KEY
-        );
-        toast.success(t("contact.success"));
-      } else {
-        // Modo demo: simula envio quando EmailJS não está configurado
-        await new Promise((resolve) => setTimeout(resolve, 1500));
-        toast.success(t("contact.success"));
-        console.log("📧 Form data (demo mode - configure EmailJS for real emails):", formData);
+        await emailjs.sendForm(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, formRef.current, EMAILJS_PUBLIC_KEY);
       }
 
+      toast.success(t("contact.success"));
       setFormData({ from_name: "", from_email: "", company: "", role: "", message: "" });
     } catch (error) {
       toast.error(lang === "pt" ? "Erro ao enviar. Tente novamente." : "Error sending. Please try again.");
-      console.error("EmailJS error:", error);
+      console.error("Submit error:", error);
     } finally {
       setSending(false);
     }

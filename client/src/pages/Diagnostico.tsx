@@ -6,6 +6,8 @@ import { useState } from "react";
 import { useLocation, Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { DiagnosticoProvider, useDiagnostico } from "@/contexts/DiagnosticoContext";
+import { trpc } from "@/lib/trpc";
+import { toast } from "sonner";
 import StepEmpresa from "@/components/steps/StepEmpresa";
 import StepProcessos from "@/components/steps/StepProcessos";
 import StepMaturidade from "@/components/steps/StepMaturidade";
@@ -43,6 +45,15 @@ function DiagnosticoContent() {
   const [uploadObs, setUploadObs] = useState("");
   const [saudeSection, setSaudeSection] = useState(0);
 
+  // Mutation para enviar diagnóstico ao backend
+  const submitDiagnostico = trpc.diagnostico.submit.useMutation({
+    onSuccess: (result) => {
+      if (result.recomendacoes) {
+        localStorage.setItem("diagnostico-llm-recs", result.recomendacoes);
+      }
+    },
+  });
+
   // Detectar setor
   const isSaude = data.empresa.setor === "Sa\u00fade";
   const isSetorial = ["Servi\u00e7os Financeiros", "Varejo / E-commerce", "Ind\u00fastria / Manufatura"].includes(data.empresa.setor);
@@ -68,31 +79,46 @@ function DiagnosticoContent() {
         setSaudeSection(currentStep); // Sincronizar seção do formulário saúde
       }
     } else {
-      // Salvar dados e navegar para resultado
+      // Salvar dados no localStorage E enviar ao backend
+      let finalData: any;
       if (isSaude) {
-        const combinedData = {
+        finalData = {
           ...data,
           saudeSpecific: saudeData,
-          uploadFiles: uploadFiles.map(f => f.name),
-          processos: { ...data.processos, areas: ["Atendimento ao Cliente / Suporte", "RH / Gest\u00e3o de Pessoas"], horasManual: saudeData.tempoAdministrativo === "3h+" ? "mais-100" : saudeData.tempoAdministrativo === "2-3h" ? "60-100" : "30-60", gargalos: saudeData.doresOperacionais.map(d => { if (d.includes("mensagens")) return "Atendimento a clientes repetitivo"; if (d.includes("Agendamento")) return "Aprova\u00e7\u00f5es em cadeia demoradas"; if (d.includes("Cobran\u00e7as")) return "Concilia\u00e7\u00e3o de dados entre sistemas"; if (d.includes("Triagem")) return "Classifica\u00e7\u00e3o e triagem de documentos"; return "Entrada manual de dados repetitiva"; }) },
+          processos: { ...data.processos, areas: ["Atendimento ao Cliente / Suporte", "RH / Gest\u00e3o de Pessoas"], horasManual: saudeData.tempoAdministrativo === "3h+" ? "mais-100" : saudeData.tempoAdministrativo === "2-3h" ? "60-100" : "30-60", gargalos: saudeData.doresOperacionais.map(d => { if (d.includes("mensagens")) return "Atendimento a clientes repetitivo"; if (d.includes("Agendamento")) return "Aprova\u00e7\u00f5es em cadeia demoradas"; return "Entrada manual de dados repetitiva"; }) },
           maturidade: { ...data.maturidade, nivelDigital: "basico", experienciaIA: "nenhuma", urgencia: "urgente" },
           objetivos: { ...data.objetivos, prioridades: ["Redu\u00e7\u00e3o de custos operacionais", "Personaliza\u00e7\u00e3o em escala"], prazo: "3-meses" },
-          dores: { ...data.dores, maioresDores: ["Processos manuais consumindo tempo excessivo", "Dificuldade em escalar opera\u00e7\u00f5es"], processosCriticos: ["Atendimento e suporte (L1/L2)", "Onboarding de clientes"] },
+          dores: { ...data.dores, maioresDores: ["Processos manuais consumindo tempo excessivo"], processosCriticos: ["Atendimento e suporte (L1/L2)"] },
         };
-        localStorage.setItem("diagnostico-data", JSON.stringify(combinedData));
       } else if (isSetorial) {
-        const combinedData = {
+        finalData = {
           ...data,
           setorialSpecific: setorialData,
-          processos: { ...data.processos, areas: setorialData.processosCore.length > 0 ? setorialData.processosCore.slice(0, 3).map(() => "Atendimento ao Cliente / Suporte") : ["Atendimento ao Cliente / Suporte"], horasManual: "30-60", gargalos: setorialData.doresSetoriais.map(d => "Entrada manual de dados repetitiva") },
+          processos: { ...data.processos, areas: ["Atendimento ao Cliente / Suporte"], horasManual: "30-60", gargalos: setorialData.doresSetoriais.map(() => "Entrada manual de dados repetitiva") },
           maturidade: { ...data.maturidade, nivelDigital: "intermediario", experienciaIA: "pilotos", urgencia: "urgente" },
-          objetivos: { ...data.objetivos, prioridades: setorialData.expectativasIA.slice(0, 3).length > 0 ? ["Redu\u00e7\u00e3o de custos operacionais"] : ["Redu\u00e7\u00e3o de custos operacionais"], prazo: "3-meses" },
-          dores: { ...data.dores, maioresDores: setorialData.doresSetoriais.length > 0 ? ["Processos manuais consumindo tempo excessivo", "Dificuldade em escalar opera\u00e7\u00f5es"] : ["Processos manuais consumindo tempo excessivo"], processosCriticos: ["Atendimento e suporte (L1/L2)"] },
+          objetivos: { ...data.objetivos, prioridades: ["Redu\u00e7\u00e3o de custos operacionais"], prazo: "3-meses" },
+          dores: { ...data.dores, maioresDores: ["Processos manuais consumindo tempo excessivo"], processosCriticos: ["Atendimento e suporte (L1/L2)"] },
         };
-        localStorage.setItem("diagnostico-data", JSON.stringify(combinedData));
       } else {
-        localStorage.setItem("diagnostico-data", JSON.stringify(data));
+        finalData = data;
       }
+
+      // Salvar no localStorage para a p\u00e1gina de resultado
+      localStorage.setItem("diagnostico-data", JSON.stringify(finalData));
+
+      // Enviar ao backend (async, n\u00e3o bloqueia navega\u00e7\u00e3o)
+      try {
+        submitDiagnostico.mutate({
+          empresaNome: data.empresa.nome,
+          empresaSetor: data.empresa.setor,
+          empresaPorte: data.empresa.porte,
+          dadosCompletos: JSON.stringify(finalData),
+          scores: { geral: 50, prontidao: 50, potencial: 50, urgencia: 50, roi: 50, facilidade: 50 },
+        });
+      } catch (e) {
+        // Silently fail - localStorage j\u00e1 tem os dados
+      }
+
       navigate("/resultado");
     }
   };
