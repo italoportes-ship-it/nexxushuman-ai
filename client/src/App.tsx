@@ -17,8 +17,8 @@ import ProductsPage from "./pages/ProductsPage";
 import ProductDetail from "./pages/ProductDetail";
 import DiagnosticoLanding from "./pages/DiagnosticoLanding";
 import Resultado from "./pages/Resultado";
-
 function Router() {
+  // make sure to consider if you need authentication for certain routes
   return (
     <Switch>
       <Route path="/" component={Home} />
