@@ -56,6 +56,9 @@ export default function ProductsPage() {
       <main className="pt-[120px]">
         {/* Hero — estilo IBM watsonx */}
         <HeroProduct lang={lang} />
+
+        {/* Seção de Pitch Textual */}
+        <PitchSection lang={lang} />
         
         {/* Benefícios com ícones — "Você pediu. Entregamos." */}
         <BenefitsSection lang={lang} />
@@ -111,21 +114,137 @@ function HeroProduct({ lang }: { lang: string }) {
             </Link>
           </div>
 
-          {/* V\u00eddeo Pitch — Fundo limpo e clean */}
+          {/* V\u00eddeo Pitch — Apresentador masculino, fundo limpo */}
           <div className="mt-12 relative max-w-[900px]">
             <div className="relative border border-white/10 bg-[#111] overflow-hidden">
               <video
                 className="w-full aspect-video object-cover"
                 controls
-                poster="/manus-storage/pitch-presenter-clean_a394a34f.png"
+                poster="/manus-storage/pitch-male-presenter_34bb8787.png"
                 preload="metadata"
               >
-                <source src="/manus-storage/nexxus-pitch-video_b0727af4.mp4" type="video/mp4" />
+                <source src="/manus-storage/nexxus-pitch-male_1967e334.mp4" type="video/mp4" />
               </video>
               <div className="absolute bottom-3 left-3 bg-black/70 px-3 py-1 text-[10px] text-white/60 font-medium">
                 {lang === "pt" ? "Pitch NexxusHuman-AI — O Paradoxo da IA" : "NexxusHuman-AI Pitch — The AI Paradox"}
               </div>
             </div>
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+/* ===== Seção de Pitch Textual ===== */
+function PitchSection({ lang }: { lang: string }) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-80px" });
+
+  return (
+    <section ref={ref} className="py-20 bg-black border-t border-white/5">
+      <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
+        <motion.div initial={{ opacity: 0, y: 30 }} animate={isInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.7 }}>
+          {/* Elevator Pitch */}
+          <div className="max-w-[800px] mb-16">
+            <span className="text-[11px] font-bold tracking-[0.2em] uppercase text-[#A100FF] block mb-4">
+              {lang === "pt" ? "O Paradoxo da IA" : "The AI Paradox"}
+            </span>
+            <blockquote className="text-xl sm:text-2xl font-bold text-white leading-relaxed mb-6 border-l-2 border-[#A100FF] pl-6">
+              {lang === "pt"
+                ? "79% das empresas experimentam com IA, mas apenas 11% conseguem escalar agentes aut\u00f4nomos para produ\u00e7\u00e3o real. N\u00f3s resolvemos esse paradoxo."
+                : "79% of companies experiment with AI, but only 11% manage to scale autonomous agents to real production. We solve this paradox."}
+            </blockquote>
+            <p className="text-[15px] text-white/50 leading-relaxed">
+              {lang === "pt"
+                ? "N\u00e3o vendemos apenas tecnologia. N\u00f3s constru\u00edmos a sua Organiza\u00e7\u00e3o Ag\u00eantica, unindo a intelig\u00eancia humana \u00e0 efici\u00eancia da for\u00e7a de trabalho de sil\u00edcio para gerar um ROI m\u00e9dio de 171%."
+                : "We don't just sell technology. We build your Agentic Organization, combining human intelligence with the efficiency of the silicon workforce to generate an average ROI of 171%."}
+            </p>
+          </div>
+
+          {/* 2 Passos */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-[2px]">
+            <div className="bg-[#111] p-8 lg:p-10">
+              <div className="flex items-center gap-3 mb-4">
+                <span className="text-[#A100FF] font-mono text-sm font-bold">01</span>
+                <h3 className="text-xl font-bold text-white">
+                  {lang === "pt" ? "Diagn\u00f3stico de Prontid\u00e3o" : "Readiness Diagnostic"}
+                </h3>
+              </div>
+              <p className="text-[15px] text-white/50 leading-relaxed mb-6">
+                {lang === "pt"
+                  ? "Antes de escrever uma \u00fanica linha de c\u00f3digo, mapeamos a realidade da sua opera\u00e7\u00e3o. Avaliamos qualidade de dados, governan\u00e7a, maturidade de workflows e prontid\u00e3o da equipe."
+                  : "Before writing a single line of code, we map your operation's reality. We assess data quality, governance, workflow maturity and team readiness."}
+              </p>
+              <div className="space-y-2">
+                {(lang === "pt" ? [
+                  "Qualidade de Dados: contexto sem\u00e2ntico para decis\u00f5es",
+                  "Governan\u00e7a: prote\u00e7\u00e3o contra Shadow AI",
+                  "Workflows: processos prontos para autonomia",
+                  "Equipe: prontid\u00e3o para orquestrar IA",
+                ] : [
+                  "Data Quality: semantic context for decisions",
+                  "Governance: protection against Shadow AI",
+                  "Workflows: processes ready for autonomy",
+                  "Team: readiness to orchestrate AI",
+                ]).map((item, i) => (
+                  <div key={i} className="flex items-center gap-2 text-sm text-white/60">
+                    <CheckCircle2 className="w-4 h-4 text-[#A100FF] shrink-0" />
+                    {item}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-[#111] p-8 lg:p-10">
+              <div className="flex items-center gap-3 mb-4">
+                <span className="text-[#A100FF] font-mono text-sm font-bold">02</span>
+                <h3 className="text-xl font-bold text-white">
+                  {lang === "pt" ? "Cria\u00e7\u00e3o e Orquestra\u00e7\u00e3o" : "Creation & Orchestration"}
+                </h3>
+              </div>
+              <p className="text-[15px] text-white/50 leading-relaxed mb-6">
+                {lang === "pt"
+                  ? "N\u00e3o automatizamos processos ruins. Redesenhamos seus fluxos de valor de ponta a ponta com design Agent-Native, implementando agentes especializados com governan\u00e7a por ciclo de vida."
+                  : "We don't automate bad processes. We redesign your value flows end-to-end with Agent-Native design, implementing specialized agents with lifecycle governance."}
+              </p>
+              <div className="space-y-2">
+                {(lang === "pt" ? [
+                  "Agentes especializados por \u00e1rea (finan\u00e7as, RH, TI)",
+                  "Governan\u00e7a Human-in-the-loop",
+                  "Redesenho Agent-Native dos processos",
+                  "Capacita\u00e7\u00e3o da equipe como orquestradores",
+                ] : [
+                  "Specialized agents by area (finance, HR, IT)",
+                  "Human-in-the-loop governance",
+                  "Agent-Native process redesign",
+                  "Team training as orchestrators",
+                ]).map((item, i) => (
+                  <div key={i} className="flex items-center gap-2 text-sm text-white/60">
+                    <CheckCircle2 className="w-4 h-4 text-[#A100FF] shrink-0" />
+                    {item}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* ROI */}
+          <div className="mt-[2px] bg-[#A100FF]/5 border border-[#A100FF]/20 p-8 flex flex-col sm:flex-row items-center justify-between gap-6">
+            <div>
+              <span className="text-4xl font-black text-[#A100FF]">171%</span>
+              <span className="text-sm text-white/50 block mt-1">
+                {lang === "pt" ? "ROI m\u00e9dio em 12-18 meses" : "Average ROI in 12-18 months"}
+              </span>
+            </div>
+            <p className="text-sm text-white/50 max-w-md">
+              {lang === "pt"
+                ? "Empresas que implementam a organiza\u00e7\u00e3o ag\u00eantica de forma estruturada reduzem o tempo de ciclo de processos core e escalam capacidade produtiva sem aumentar headcount."
+                : "Companies that implement the agentic organization in a structured way reduce core process cycle time and scale productive capacity without increasing headcount."}
+            </p>
+            <Link href="/agendar" className="shrink-0 inline-flex items-center gap-2 px-6 py-3 bg-[#A100FF] text-white font-semibold text-sm hover:bg-[#8800DD] transition-colors">
+              {lang === "pt" ? "Agendar Sess\u00e3o" : "Book Session"} <ArrowRight className="w-4 h-4" />
+            </Link>
           </div>
         </motion.div>
       </div>
