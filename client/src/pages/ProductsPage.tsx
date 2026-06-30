@@ -111,19 +111,19 @@ function HeroProduct({ lang }: { lang: string }) {
             </Link>
           </div>
 
-          {/* V\u00eddeo Demo */}
+          {/* V\u00eddeo Pitch — Fundo limpo e clean */}
           <div className="mt-12 relative max-w-[900px]">
             <div className="relative border border-white/10 bg-[#111] overflow-hidden">
               <video
                 className="w-full aspect-video object-cover"
                 controls
-                poster="/manus-storage/presenter-reference_c104f2db.png"
+                poster="/manus-storage/pitch-presenter-clean_a394a34f.png"
                 preload="metadata"
               >
-                <source src="/manus-storage/nexxus-demo-video_6e08c704.mp4" type="video/mp4" />
+                <source src="/manus-storage/nexxus-pitch-video_b0727af4.mp4" type="video/mp4" />
               </video>
               <div className="absolute bottom-3 left-3 bg-black/70 px-3 py-1 text-[10px] text-white/60 font-medium">
-                {lang === "pt" ? "Legendas dispon\u00edveis em ingl\u00eas" : "Subtitles available in English"}
+                {lang === "pt" ? "Pitch NexxusHuman-AI — O Paradoxo da IA" : "NexxusHuman-AI Pitch — The AI Paradox"}
               </div>
             </div>
           </div>
