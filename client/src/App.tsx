@@ -16,6 +16,7 @@ import BlogPage, { BlogArticle } from "./pages/BlogPage";
 import ProductsPage from "./pages/ProductsPage";
 import ProductDetail from "./pages/ProductDetail";
 import AdminDashboard from "./pages/AdminDashboard";
+import MeusDiagnosticos from "./pages/MeusDiagnosticos";
 import DiagnosticoLanding from "./pages/DiagnosticoLanding";
 import Resultado from "./pages/Resultado";
 function Router() {
@@ -36,6 +37,7 @@ function Router() {
       <Route path="/blog" component={BlogPage} />
       <Route path="/blog/:id" component={BlogArticle} />
       <Route path="/admin" component={AdminDashboard} />
+      <Route path="/meus-diagnosticos" component={MeusDiagnosticos} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>

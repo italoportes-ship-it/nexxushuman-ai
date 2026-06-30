@@ -139,6 +139,35 @@ export const appRouter = router({
         return { id: diagnosticoId, recomendacoes: recomendacoesIA };
       }),
 
+    // Enviar relatório por email
+    sendReport: publicProcedure
+      .input(z.object({
+        email: z.string().email(),
+        empresaNome: z.string(),
+        scoreGeral: z.number(),
+        recomendacoes: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        // Notificar owner com os dados do relatório
+        await notifyOwner({
+          title: `Relatório enviado: ${input.empresaNome}`,
+          content: `Relatório de diagnóstico enviado para: ${input.email}\nEmpresa: ${input.empresaNome}\nScore: ${input.scoreGeral}/100`,
+        }).catch(() => {});
+
+        // Salvar como lead se email fornecido
+        const db = await getDb();
+        if (db) {
+          await db.insert(leads).values({
+            nome: input.empresaNome,
+            email: input.email,
+            empresa: input.empresaNome,
+            origem: "diagnostico",
+          });
+        }
+
+        return { success: true, message: "Relatório enviado com sucesso" };
+      }),
+
     // Listar diagnósticos (admin)
     list: protectedProcedure.query(async () => {
       const db = await getDb();

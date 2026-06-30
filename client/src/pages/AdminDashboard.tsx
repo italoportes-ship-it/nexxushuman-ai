@@ -2,10 +2,11 @@
  * Visualizar diagnósticos, leads e métricas do funil
  * ================================================= */
 
+import { useState } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { Link } from "wouter";
-import { BarChart3, Users, Brain, TrendingUp, FileText } from "lucide-react";
+import { BarChart3, Users, Brain, TrendingUp, FileText, Filter } from "lucide-react";
 import { getLoginUrl } from "@/const";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 
@@ -195,21 +196,69 @@ function ChartsSection() {
 
 function DiagnosticosRecentes() {
   const { data: diagnosticosList, isLoading } = trpc.diagnostico.list.useQuery();
+  const [filterSetor, setFilterSetor] = useState("todos");
+  const [filterScore, setFilterScore] = useState("todos");
+  const [filterPeriodo, setFilterPeriodo] = useState("todos");
+
+  // Aplicar filtros
+  const filteredList = (diagnosticosList || []).filter((d) => {
+    if (filterSetor !== "todos" && d.empresaSetor !== filterSetor) return false;
+    if (filterScore === "alto" && (d.scoreGeral || 0) < 70) return false;
+    if (filterScore === "medio" && ((d.scoreGeral || 0) < 40 || (d.scoreGeral || 0) >= 70)) return false;
+    if (filterScore === "baixo" && (d.scoreGeral || 0) >= 40) return false;
+    if (filterPeriodo !== "todos") {
+      const now = Date.now();
+      const created = new Date(d.createdAt).getTime();
+      if (filterPeriodo === "7d" && now - created > 7 * 86400000) return false;
+      if (filterPeriodo === "30d" && now - created > 30 * 86400000) return false;
+      if (filterPeriodo === "90d" && now - created > 90 * 86400000) return false;
+    }
+    return true;
+  });
+
+  // Setores únicos para o filtro
+  const setores = Array.from(new Set((diagnosticosList || []).map(d => d.empresaSetor).filter(Boolean)));
 
   return (
     <div className="mb-8">
-      <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-        <Brain className="w-5 h-5 text-[#A100FF]" />
-        Diagnósticos Recentes
-      </h2>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-xl font-bold flex items-center gap-2">
+          <Brain className="w-5 h-5 text-[#A100FF]" />
+          Diagnósticos ({filteredList.length})
+        </h2>
+        <div className="flex items-center gap-2">
+          <Filter className="w-4 h-4 text-white/40" />
+        </div>
+      </div>
+
+      {/* Filtros */}
+      <div className="flex flex-wrap gap-2 mb-4">
+        <select value={filterSetor} onChange={e => setFilterSetor(e.target.value)} className="bg-[#111] border border-white/10 text-white/70 text-xs px-3 py-1.5 focus:outline-none focus:border-[#A100FF]/50">
+          <option value="todos">Todos os setores</option>
+          {setores.map(s => <option key={s} value={s}>{s}</option>)}
+        </select>
+        <select value={filterScore} onChange={e => setFilterScore(e.target.value)} className="bg-[#111] border border-white/10 text-white/70 text-xs px-3 py-1.5 focus:outline-none focus:border-[#A100FF]/50">
+          <option value="todos">Todos os scores</option>
+          <option value="alto">Alto (70+)</option>
+          <option value="medio">Médio (40-69)</option>
+          <option value="baixo">Baixo (&lt;40)</option>
+        </select>
+        <select value={filterPeriodo} onChange={e => setFilterPeriodo(e.target.value)} className="bg-[#111] border border-white/10 text-white/70 text-xs px-3 py-1.5 focus:outline-none focus:border-[#A100FF]/50">
+          <option value="todos">Todo período</option>
+          <option value="7d">Últimos 7 dias</option>
+          <option value="30d">Últimos 30 dias</option>
+          <option value="90d">Últimos 90 dias</option>
+        </select>
+      </div>
+
       <div className="bg-[#111] overflow-hidden">
         {isLoading ? (
           <div className="p-8 text-center text-white/40">Carregando...</div>
-        ) : !diagnosticosList?.length ? (
-          <div className="p-8 text-center text-white/40">Nenhum diagnóstico ainda</div>
+        ) : !filteredList.length ? (
+          <div className="p-8 text-center text-white/40">Nenhum diagnóstico encontrado com estes filtros</div>
         ) : (
           <div className="divide-y divide-white/5">
-            {diagnosticosList.slice(0, 10).map((d) => (
+            {filteredList.slice(0, 20).map((d) => (
               <div key={d.id} className="p-4 flex items-center justify-between hover:bg-white/[0.02]">
                 <div>
                   <span className="text-sm font-semibold text-white">{d.empresaNome}</span>
@@ -217,6 +266,7 @@ function DiagnosticosRecentes() {
                     <span className="text-[10px] text-[#A100FF] font-medium">{d.empresaSetor}</span>
                     <span className="text-[10px] text-white/30">•</span>
                     <span className="text-[10px] text-white/30">{d.empresaPorte}</span>
+                    {d.email && <><span className="text-[10px] text-white/30">•</span><span className="text-[10px] text-white/30">{d.email}</span></>}
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
