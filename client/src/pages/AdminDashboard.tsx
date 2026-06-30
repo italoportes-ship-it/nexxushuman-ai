@@ -7,6 +7,7 @@ import { trpc } from "@/lib/trpc";
 import { Link } from "wouter";
 import { BarChart3, Users, Brain, TrendingUp, FileText } from "lucide-react";
 import { getLoginUrl } from "@/const";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 
 export default function AdminDashboard() {
   const { user, loading, isAuthenticated } = useAuth();
@@ -58,6 +59,9 @@ export default function AdminDashboard() {
         {/* Stats Cards */}
         <StatsCards />
 
+        {/* Gráficos */}
+        <ChartsSection />
+
         {/* Diagnósticos Recentes */}
         <DiagnosticosRecentes />
 
@@ -88,6 +92,103 @@ function StatsCards() {
           <span className="text-xs text-white/40 uppercase tracking-wider">{s.label}</span>
         </div>
       ))}
+    </div>
+  );
+}
+
+const COLORS = ["#A100FF", "#00C49F", "#FFBB28", "#FF8042", "#0088FE", "#FF6B6B"];
+
+function ChartsSection() {
+  const { data: diagStats } = trpc.diagnostico.stats.useQuery();
+  const { data: diagnosticosList } = trpc.diagnostico.list.useQuery();
+
+  // Dados para gráfico de barras - evolução semanal
+  const weeklyData = (() => {
+    if (!diagnosticosList?.length) return [
+      { semana: "Sem 1", diagnosticos: 0 },
+      { semana: "Sem 2", diagnosticos: 0 },
+      { semana: "Sem 3", diagnosticos: 0 },
+      { semana: "Sem 4", diagnosticos: 0 },
+    ];
+    // Agrupar por semana (simplificado)
+    const now = Date.now();
+    const weeks = [0, 1, 2, 3].map(w => {
+      const start = now - (w + 1) * 7 * 24 * 60 * 60 * 1000;
+      const end = now - w * 7 * 24 * 60 * 60 * 1000;
+      const count = diagnosticosList.filter(d => {
+        const t = new Date(d.createdAt).getTime();
+        return t >= start && t < end;
+      }).length;
+      return { semana: `Sem ${4 - w}`, diagnosticos: count };
+    }).reverse();
+    return weeks;
+  })();
+
+  // Dados para pie chart - distribuição por setor
+  const sectorData = diagStats?.setores?.map((s: any) => ({
+    name: s.setor?.substring(0, 15) || "Outro",
+    value: Number(s.count) || 0,
+  })) || [];
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-[2px] mb-8">
+      {/* Gráfico de Barras - Evolução Semanal */}
+      <div className="bg-[#111] p-6">
+        <h3 className="text-sm font-semibold text-white/70 mb-4">Diagnósticos por Semana</h3>
+        <ResponsiveContainer width="100%" height={200}>
+          <BarChart data={weeklyData}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+            <XAxis dataKey="semana" tick={{ fill: "#666", fontSize: 11 }} />
+            <YAxis tick={{ fill: "#666", fontSize: 11 }} />
+            <Tooltip
+              contentStyle={{ background: "#1a1a1a", border: "1px solid #333", borderRadius: 0 }}
+              labelStyle={{ color: "#fff" }}
+            />
+            <Bar dataKey="diagnosticos" fill="#A100FF" radius={[2, 2, 0, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+
+      {/* Pie Chart - Distribuição por Setor */}
+      <div className="bg-[#111] p-6">
+        <h3 className="text-sm font-semibold text-white/70 mb-4">Distribuição por Setor</h3>
+        {sectorData.length > 0 ? (
+          <ResponsiveContainer width="100%" height={200}>
+            <PieChart>
+              <Pie
+                data={sectorData}
+                cx="50%"
+                cy="50%"
+                innerRadius={50}
+                outerRadius={80}
+                paddingAngle={2}
+                dataKey="value"
+              >
+                {sectorData.map((_: any, index: number) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip
+                contentStyle={{ background: "#1a1a1a", border: "1px solid #333", borderRadius: 0 }}
+              />
+            </PieChart>
+          </ResponsiveContainer>
+        ) : (
+          <div className="h-[200px] flex items-center justify-center text-white/30 text-sm">
+            Sem dados ainda
+          </div>
+        )}
+        {sectorData.length > 0 && (
+          <div className="flex flex-wrap gap-3 mt-2">
+            {sectorData.map((s: any, i: number) => (
+              <div key={i} className="flex items-center gap-1.5">
+                <div className="w-2.5 h-2.5" style={{ background: COLORS[i % COLORS.length] }} />
+                <span className="text-[10px] text-white/50">{s.name} ({s.value})</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

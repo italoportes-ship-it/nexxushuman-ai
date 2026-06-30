@@ -12,6 +12,7 @@ import { diagnosticos, leads, uploads } from "../drizzle/schema";
 import { desc, eq, sql } from "drizzle-orm";
 import { storagePut } from "./storage";
 import { invokeLLM } from "./_core/llm";
+import { notifyOwner } from "./_core/notification";
 import { nanoid } from "nanoid";
 
 export const appRouter = router({
@@ -129,6 +130,12 @@ export const appRouter = router({
             .where(eq(diagnosticos.id, diagnosticoId));
         }
 
+        // Notificar owner sobre novo diagnóstico
+        notifyOwner({
+          title: `Novo Diagnóstico: ${input.empresaNome}`,
+          content: `Empresa: ${input.empresaNome} (${input.empresaSetor}, ${input.empresaPorte})\nScore Geral: ${input.scores.geral}/100\nRecomendações geradas: ${recomendacoesIA ? "Sim" : "Não"}`,
+        }).catch(() => {});
+
         return { id: diagnosticoId, recomendacoes: recomendacoesIA };
       }),
 
@@ -218,6 +225,12 @@ export const appRouter = router({
           mensagem: input.mensagem || null,
           origem: input.origem,
         });
+
+        // Notificar owner sobre novo lead
+        notifyOwner({
+          title: `Novo Lead: ${input.nome}`,
+          content: `Nome: ${input.nome}\nEmail: ${input.email}\nEmpresa: ${input.empresa || "N/A"}\nOrigem: ${input.origem}\nMensagem: ${input.mensagem || "Sem mensagem"}`,
+        }).catch(() => {});
 
         return { success: true };
       }),

@@ -330,7 +330,36 @@ export default function Resultado() {
         const parsed = JSON.parse(stored) as DiagnosticoData;
         setData(parsed);
         setScores(calcularScores(parsed));
-        setRecomendacoes(gerarRecomendacoes(parsed));
+
+        // Tentar carregar recomendações do LLM primeiro
+        const llmRecs = localStorage.getItem("diagnostico-llm-recs");
+        if (llmRecs) {
+          try {
+            const parsedLLM = JSON.parse(llmRecs);
+            if (parsedLLM.recomendacoes && Array.isArray(parsedLLM.recomendacoes)) {
+              // Converter formato LLM para formato interno
+              const llmRecomendacoes: Recomendacao[] = parsedLLM.recomendacoes.map((r: any, i: number) => ({
+                id: i + 1,
+                categoria: r.categoria || "IA",
+                titulo: r.titulo,
+                descricao: r.descricao,
+                agente: r.agente || r.titulo,
+                impacto: r.impacto || "alto",
+                risco: r.risco || "baixo",
+                prazo: r.prazo || "4-8 semanas",
+                roi: r.roi || "200-400%",
+              }));
+              setRecomendacoes(llmRecomendacoes);
+            } else {
+              setRecomendacoes(gerarRecomendacoes(parsed));
+            }
+          } catch {
+            setRecomendacoes(gerarRecomendacoes(parsed));
+          }
+        } else {
+          setRecomendacoes(gerarRecomendacoes(parsed));
+        }
+
         setTimeout(() => setAnimateScores(true), 300);
       } catch (e) {
         console.error("Erro ao parsear dados:", e);
