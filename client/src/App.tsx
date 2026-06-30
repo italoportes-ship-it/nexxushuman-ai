@@ -19,6 +19,8 @@ import AdminDashboard from "./pages/AdminDashboard";
 import MeusDiagnosticos from "./pages/MeusDiagnosticos";
 import ResultadoPublico from "./pages/ResultadoPublico";
 import AgendarPage from "./pages/AgendarPage";
+import WebinarPage from "./pages/WebinarPage";
+import ChatWidget from "./components/ChatWidget";
 import DiagnosticoLanding from "./pages/DiagnosticoLanding";
 import Resultado from "./pages/Resultado";
 function Router() {
@@ -42,6 +44,7 @@ function Router() {
       <Route path="/meus-diagnosticos" component={MeusDiagnosticos} />
       <Route path="/resultado/:id" component={ResultadoPublico} />
       <Route path="/agendar" component={AgendarPage} />
+      <Route path="/webinar" component={WebinarPage} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>
@@ -51,11 +54,13 @@ function Router() {
 function App() {
   return (
     <ErrorBoundary>
+      {/* Chatbot flutuante global */}
       <ThemeProvider defaultTheme="dark">
         <LanguageProvider>
           <TooltipProvider>
             <Toaster />
             <Router />
+            <ChatWidget />
           </TooltipProvider>
         </LanguageProvider>
       </ThemeProvider>

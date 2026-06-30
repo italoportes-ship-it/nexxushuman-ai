@@ -320,6 +320,45 @@ export const appRouter = router({
       };
     }),
   }),
+
+  // ===== CHATBOT IA =====
+  chat: router({
+    send: publicProcedure
+      .input(z.object({
+        messages: z.array(z.object({
+          role: z.enum(["system", "user", "assistant"]),
+          content: z.string(),
+        })),
+      }))
+      .mutation(async ({ input }) => {
+        const systemPrompt = `Você é o assistente virtual da NexxusHuman-AI, uma consultoria especializada em organização agêntica. Responda de forma clara, profissional e concisa em português.
+
+Sobre a NexxusHuman-AI:
+- Transformamos empresas tradicionais em Organizações Agênticas
+- Oferecemos: Diagnóstico de Prontidão + Criação e Orquestração de Agentes
+- ROI médio de 171% em 12-18 meses
+- 79% das empresas experimentam com IA, mas apenas 11% escalam agentes
+- Não automatizamos processos ruins — redesenhamos com design Agent-Native
+- Setores: Finanças, Saúde, Varejo, Indústria, Tecnologia
+- Diagnóstico gratuito disponível em /diagnostico
+- Agendamento de consultoria em /agendar
+
+Seja útil, objetivo e direcione para o diagnóstico ou agendamento quando apropriado. Não invente informações que não estão acima.`;
+
+        const messagesWithSystem = [
+          { role: "system" as const, content: systemPrompt },
+          ...input.messages.slice(-10), // Últimas 10 mensagens para contexto
+        ];
+
+        try {
+          const response = await invokeLLM({ messages: messagesWithSystem });
+          const content = response.choices?.[0]?.message?.content;
+          return { reply: typeof content === "string" ? content : "Desculpe, n\u00e3o consegui processar sua mensagem. Tente novamente." };
+        } catch (e) {
+          return { reply: "Desculpe, estou com dificuldades t\u00e9cnicas no momento. Por favor, tente novamente em alguns instantes." };
+        }
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;
