@@ -15,6 +15,7 @@ import StepObjetivos from "@/components/steps/StepObjetivos";
 import StepDores from "@/components/steps/StepDores";
 import StepSaude, { initialSaudeData, type SaudeData } from "@/components/steps/StepSaude";
 import StepSetorial, { initialSetorialData, type SetorialData } from "@/components/steps/StepSetorial";
+import StepFarma, { initialFarmaData, type FarmaData } from "@/components/steps/StepFarma";
 import StepUpload from "@/components/steps/StepUpload";
 import ProgressSidebar from "@/components/ProgressSidebar";
 import { Button } from "@/components/ui/button";
@@ -41,6 +42,7 @@ function DiagnosticoContent() {
   const [, navigate] = useLocation();
   const [saudeData, setSaudeData] = useState<SaudeData>(initialSaudeData);
   const [setorialData, setSetorialData] = useState<SetorialData>(initialSetorialData);
+  const [farmaData, setFarmaData] = useState<FarmaData>(initialFarmaData);
   const [uploadFiles, setUploadFiles] = useState<any[]>([]);
   const [uploadObs, setUploadObs] = useState("");
   const [saudeSection, setSaudeSection] = useState(0);
@@ -56,6 +58,7 @@ function DiagnosticoContent() {
 
   // Detectar setor
   const isSaude = data.empresa.setor === "Sa\u00fade";
+  const isFarma = data.empresa.setor === "Ind\u00fastria Farmac\u00eautica";
   const isSetorial = ["Servi\u00e7os Financeiros", "Varejo / E-commerce", "Ind\u00fastria / Manufatura"].includes(data.empresa.setor);
   
   const stepsSetorial = [
@@ -66,9 +69,17 @@ function DiagnosticoContent() {
     { id: 4, title: "IA", subtitle: "Expectativas" },
   ];
 
-  const steps = isSaude ? stepsSaude : isSetorial ? stepsSetorial : stepsDefault;
+  const stepsFarma = [
+    { id: 0, title: "Empresa", subtitle: "Perfil e contexto" },
+    { id: 1, title: "Regulat\u00f3rio", subtitle: "Certifica\u00e7\u00f5es e mercados" },
+    { id: 2, title: "Qualidade", subtitle: "Opera\u00e7\u00f5es e GxP" },
+    { id: 3, title: "Supply Chain", subtitle: "Rastreabilidade" },
+    { id: 4, title: "Farmacovig.", subtitle: "Dados e IA" },
+  ];
 
-  const canAdvance = (isSaude || isSetorial)
+  const steps = isSaude ? stepsSaude : isFarma ? stepsFarma : isSetorial ? stepsSetorial : stepsDefault;
+
+  const canAdvance = (isSaude || isFarma || isSetorial)
     ? (currentStep === 0 ? isStepComplete(0) : true)
     : isStepComplete(currentStep);
 
@@ -89,6 +100,15 @@ function DiagnosticoContent() {
           maturidade: { ...data.maturidade, nivelDigital: "basico", experienciaIA: "nenhuma", urgencia: "urgente" },
           objetivos: { ...data.objetivos, prioridades: ["Redu\u00e7\u00e3o de custos operacionais", "Personaliza\u00e7\u00e3o em escala"], prazo: "3-meses" },
           dores: { ...data.dores, maioresDores: ["Processos manuais consumindo tempo excessivo"], processosCriticos: ["Atendimento e suporte (L1/L2)"] },
+        };
+      } else if (isFarma) {
+        finalData = {
+          ...data,
+          farmaSpecific: farmaData,
+          processos: { ...data.processos, areas: ["Opera\u00e7\u00f5es / Produ\u00e7\u00e3o", "Qualidade / QA"], horasManual: "mais-100", gargalos: farmaData.doresFarma.map(() => "Entrada manual de dados repetitiva") },
+          maturidade: { ...data.maturidade, nivelDigital: farmaData.nivelAutomacaoLab === "full" ? "avancado" : "intermediario", experienciaIA: "pilotos", urgencia: "urgente" },
+          objetivos: { ...data.objetivos, prioridades: ["Redu\u00e7\u00e3o de custos operacionais", "Compliance e governan\u00e7a"], prazo: "6-meses" },
+          dores: { ...data.dores, maioresDores: farmaData.doresFarma.slice(0, 3).length > 0 ? ["Processos manuais consumindo tempo excessivo", "Compliance regulat\u00f3rio complexo"] : ["Processos manuais consumindo tempo excessivo"], processosCriticos: ["Qualidade / QA", "Farmacovigilancia"] },
         };
       } else if (isSetorial) {
         finalData = {
@@ -154,6 +174,17 @@ function DiagnosticoContent() {
           onSectionChange={setSaudeSection}
           saudeData={saudeData}
           onDataChange={handleSaudeDataChange}
+        />
+      );
+    }
+
+    // Indústria Farmacêutica: assessment robusto
+    if (isFarma && currentStep > 0) {
+      return (
+        <StepFarma
+          currentSection={currentStep - 1}
+          data={farmaData}
+          onDataChange={(partial) => setFarmaData(prev => ({ ...prev, ...partial }))}
         />
       );
     }

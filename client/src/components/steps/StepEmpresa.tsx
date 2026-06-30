@@ -6,9 +6,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 const setores = [
   "Tecnologia / SaaS", "Serviços Financeiros", "Varejo / E-commerce",
-  "Indústria / Manufatura", "Saúde", "Educação", "Logística / Transporte",
-  "Seguros", "Telecomunicações", "Agronegócio", "Energia", "Construção Civil",
-  "Consultoria / Serviços Profissionais", "Outro",
+  "Indústria / Manufatura", "Indústria Farmacêutica", "Saúde", "Educação",
+  "Logística / Transporte", "Seguros", "Telecomunicações", "Agronegócio",
+  "Energia", "Construção Civil", "Consultoria / Serviços Profissionais", "Outro",
 ];
 
 const portes = [
