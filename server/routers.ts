@@ -131,9 +131,14 @@ export const appRouter = router({
         }
 
         // Notificar owner sobre novo diagnóstico
+        const isLowScore = input.scores.geral < 30;
         notifyOwner({
-          title: `Novo Diagnóstico: ${input.empresaNome}`,
-          content: `Empresa: ${input.empresaNome} (${input.empresaSetor}, ${input.empresaPorte})\nScore Geral: ${input.scores.geral}/100\nRecomendações geradas: ${recomendacoesIA ? "Sim" : "Não"}`,
+          title: isLowScore
+            ? `[URGENTE] Score Baixo: ${input.empresaNome} (${input.scores.geral}/100)`
+            : `Novo Diagnóstico: ${input.empresaNome}`,
+          content: isLowScore
+            ? `ALERTA: Score muito baixo detectado!\n\nEmpresa: ${input.empresaNome} (${input.empresaSetor}, ${input.empresaPorte})\nScore Geral: ${input.scores.geral}/100\n\nRecomendação: Follow-up urgente necessário. Esta empresa precisa de atenção imediata da equipe comercial.`
+            : `Empresa: ${input.empresaNome} (${input.empresaSetor}, ${input.empresaPorte})\nScore Geral: ${input.scores.geral}/100\nRecomendações geradas: ${recomendacoesIA ? "Sim" : "Não"}`,
         }).catch(() => {});
 
         return { id: diagnosticoId, recomendacoes: recomendacoesIA };
@@ -166,6 +171,33 @@ export const appRouter = router({
         }
 
         return { success: true, message: "Relatório enviado com sucesso" };
+      }),
+
+    // Obter diagnóstico por ID (público - para página compartilhável)
+    getById: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) return null;
+        const result = await db.select().from(diagnosticos).where(eq(diagnosticos.id, input.id)).limit(1);
+        if (!result.length) return null;
+        // Retornar dados públicos (sem dados sensíveis)
+        const d = result[0];
+        return {
+          id: d.id,
+          empresaNome: d.empresaNome,
+          empresaSetor: d.empresaSetor,
+          empresaPorte: d.empresaPorte,
+          scoreGeral: d.scoreGeral,
+          scoreProntidao: d.scoreProntidao,
+          scorePotencial: d.scorePotencial,
+          scoreUrgencia: d.scoreUrgencia,
+          scoreROI: d.scoreROI,
+          scoreFacilidade: d.scoreFacilidade,
+          recomendacoesIA: d.recomendacoesIA,
+          status: d.status,
+          createdAt: d.createdAt,
+        };
       }),
 
     // Listar diagnósticos (admin)

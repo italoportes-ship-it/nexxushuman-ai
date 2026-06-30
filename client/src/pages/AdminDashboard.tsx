@@ -6,7 +6,7 @@ import { useState } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { Link } from "wouter";
-import { BarChart3, Users, Brain, TrendingUp, FileText, Filter } from "lucide-react";
+import { BarChart3, Users, Brain, TrendingUp, FileText, Filter, Download } from "lucide-react";
 import { getLoginUrl } from "@/const";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 
@@ -227,6 +227,24 @@ function DiagnosticosRecentes() {
           Diagnósticos ({filteredList.length})
         </h2>
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => {
+              if (!filteredList.length) return;
+              const headers = ["ID","Empresa","Setor","Porte","Score Geral","Prontid\u00e3o","Potencial","Urg\u00eancia","ROI","Facilidade","Status","Email","Data"];
+              const rows = filteredList.map(d => [d.id, d.empresaNome, d.empresaSetor, d.empresaPorte, d.scoreGeral||"", d.scoreProntidao||"", d.scorePotencial||"", d.scoreUrgencia||"", d.scoreROI||"", d.scoreFacilidade||"", d.status, d.email||"", new Date(d.createdAt).toLocaleDateString("pt-BR")]);
+              const csv = [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
+              const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = `admin_diagnosticos_${new Date().toISOString().split("T")[0]}.csv`;
+              a.click();
+              URL.revokeObjectURL(url);
+            }}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-white/10 text-white/60 text-xs font-medium hover:border-[#A100FF]/50 hover:text-white transition-colors"
+          >
+            <Download className="w-3 h-3" /> Exportar CSV
+          </button>
           <Filter className="w-4 h-4 text-white/40" />
         </div>
       </div>
