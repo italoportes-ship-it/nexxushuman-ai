@@ -18,6 +18,7 @@ import ProductDetail from "./pages/ProductDetail";
 import AdminDashboard from "./pages/AdminDashboard";
 import MeusDiagnosticos from "./pages/MeusDiagnosticos";
 import ResultadoPublico from "./pages/ResultadoPublico";
+import AgendarPage from "./pages/AgendarPage";
 import DiagnosticoLanding from "./pages/DiagnosticoLanding";
 import Resultado from "./pages/Resultado";
 function Router() {
@@ -40,6 +41,7 @@ function Router() {
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/meus-diagnosticos" component={MeusDiagnosticos} />
       <Route path="/resultado/:id" component={ResultadoPublico} />
+      <Route path="/agendar" component={AgendarPage} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>

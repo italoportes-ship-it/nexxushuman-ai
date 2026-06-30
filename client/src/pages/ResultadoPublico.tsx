@@ -4,8 +4,10 @@
 
 import { trpc } from "@/lib/trpc";
 import { useParams, Link } from "wouter";
-import { Brain, TrendingUp, Shield, Zap, BarChart3, Clock } from "lucide-react";
+import { Brain, TrendingUp, Shield, Zap, BarChart3, Clock, Share2, Copy, CheckCircle2 } from "lucide-react";
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from "recharts";
+import { useState } from "react";
+import { toast } from "sonner";
 
 export default function ResultadoPublico() {
   const params = useParams<{ id: string }>();
@@ -70,10 +72,21 @@ export default function ResultadoPublico() {
             <span className="text-[#A100FF] text-2xl font-black">&gt;</span>
             <span className="text-white text-lg font-bold">NexxusHuman-AI</span>
           </Link>
-          <span className="text-[10px] text-white/30 flex items-center gap-1">
-            <Clock className="w-3 h-3" />
-            {new Date(data.createdAt).toLocaleDateString("pt-BR")}
-          </span>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(window.location.href);
+                toast.success("Link copiado! Compartilhe com stakeholders.");
+              }}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-white/10 text-white/60 text-xs font-medium hover:border-[#A100FF]/50 hover:text-white transition-colors"
+            >
+              <Share2 className="w-3 h-3" /> Compartilhar
+            </button>
+            <span className="text-[10px] text-white/30 flex items-center gap-1">
+              <Clock className="w-3 h-3" />
+              {new Date(data.createdAt).toLocaleDateString("pt-BR")}
+            </span>
+          </div>
         </div>
       </header>
 
