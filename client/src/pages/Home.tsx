@@ -6,11 +6,13 @@
 import { useRef, useState, useEffect } from "react";
 import { motion, useInView, useScroll, useTransform } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/_core/hooks/useAuth";
 import { Link } from "wouter";
 
 /* ===== NAVBAR com Menu Mobile ===== */
 function Navbar() {
   const { t, lang, setLang } = useLanguage();
+  const { isAuthenticated } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
@@ -32,6 +34,11 @@ function Navbar() {
           </nav>
 
           <div className="flex items-center gap-4">
+            {isAuthenticated && (
+              <Link href="/meus-diagnosticos" className="hidden md:inline-flex text-[13px] text-white/60 hover:text-[#A100FF] transition-colors font-medium">
+                {lang === "pt" ? "Meus Diagn\u00f3sticos" : "My Diagnostics"}
+              </Link>
+            )}
             <button
               onClick={() => setLang(lang === "pt" ? "en" : "pt")}
               className="text-xs font-bold text-white/50 hover:text-white border border-white/20 px-3 py-1.5 transition-colors"
