@@ -76,3 +76,17 @@ export const leads = mysqlTable("leads", {
 
 export type Lead = typeof leads.$inferSelect;
 export type InsertLead = typeof leads.$inferInsert;
+
+// ===== Tabela de Propostas Personalizadas =====
+export const propostas = mysqlTable("propostas", {
+  id: int("id").autoincrement().primaryKey(),
+  slug: varchar("slug", { length: 20 }).notNull().unique(),
+  empresaNome: varchar("empresaNome", { length: 255 }).notNull(),
+  planoSelecionado: varchar("planoSelecionado", { length: 50 }),
+  dadosExtras: text("dadosExtras"), // JSON
+  visualizacoes: int("visualizacoes").default(0),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type Proposta = typeof propostas.$inferSelect;
+export type InsertProposta = typeof propostas.$inferInsert;

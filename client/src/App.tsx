@@ -47,6 +47,7 @@ function Router() {
       <Route path="/agendar" component={AgendarPage} />
       <Route path="/webinar" component={WebinarPage} />
       <Route path="/imersao" component={ImersaoPage} />
+      <Route path="/imersao/:slug" component={ImersaoPage} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>

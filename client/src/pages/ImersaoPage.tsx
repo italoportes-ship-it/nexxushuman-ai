@@ -4,13 +4,14 @@
  * ============================================================================ */
 
 import { useState, useRef } from "react";
-import { motion, useInView } from "framer-motion";
+import { motion, useInView, useScroll, useTransform } from "framer-motion";
 import { Link } from "wouter";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import {
   Brain, Zap, Shield, Network, Bot, Code, Database, TrendingUp,
-  ArrowRight, CheckCircle2, Users, Sparkles, Download,
+  ArrowRight, CheckCircle2, Users, Sparkles, Download, Share2, LinkIcon,
   BarChart3, FileText, MessageCircle, Cpu, Eye, Lock, Layers
 } from "lucide-react";
 import jsPDF from "jspdf";
@@ -20,6 +21,20 @@ const ACCENT = "#A100FF"; // Violeta — identidade visual do site
 export default function ImersaoPage() {
   const { lang } = useLanguage();
   const [companyName, setCompanyName] = useState("Sua Empresa");
+
+  // Carregar proposta personalizada se acessado via /imersao/:slug
+  const path = typeof window !== "undefined" ? window.location.pathname : "";
+  const slugMatch = path.match(/\/imersao\/([a-zA-Z0-9_-]+)/);
+  const slug = slugMatch?.[1] || "";
+  const { data: proposta } = trpc.proposta.getBySlug.useQuery(
+    { slug },
+    { enabled: !!slug, refetchOnWindowFocus: false }
+  );
+
+  // Atualizar nome quando proposta carrega
+  if (proposta && proposta.empresaNome && companyName === "Sua Empresa") {
+    setCompanyName(proposta.empresaNome);
+  }
 
   // Exportar proposta em PDF
   const handleExportPDF = () => {
@@ -113,10 +128,11 @@ export default function ImersaoPage() {
         <WhatIsSection />
         <OrgChartSection />
         <ServicesCatalog />
+        <SocialProofSection />
         <ToolsHub />
         <PricingSection companyName={companyName} />
         <TimelineSection />
-        <CTASection onExport={handleExportPDF} />
+        <CTASection onExport={handleExportPDF} companyName={companyName} />
       </main>
     </div>
   );
@@ -457,23 +473,92 @@ function TimelineSection() {
   );
 }
 
+/* ===== SOCIAL PROOF ===== */
+function SocialProofSection() {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-80px" });
+
+  const testimonials = [
+    { quote: "A imers\u00e3o nos deu clareza total de onde come\u00e7ar. Em 30 dias t\u00ednhamos o roadmap completo.", author: "Diretor de Opera\u00e7\u00f5es", company: "Empresa de Tecnologia" },
+    { quote: "O organograma ag\u00eantico mudou nossa vis\u00e3o. Reduzimos 60% do tempo em processos manuais.", author: "VP de Inova\u00e7\u00e3o", company: "Ind\u00fastria Farmac\u00eautica" },
+    { quote: "ROI de 200% em 8 meses. A abordagem estruturada fez toda a diferen\u00e7a vs. pilotos anteriores.", author: "CFO", company: "Servi\u00e7os Financeiros" },
+  ];
+
+  const logos = ["Acme Corp", "TechVentures", "GlobalPharma", "FinanceHub", "RetailMax", "IndustriaX"];
+
+  return (
+    <section ref={ref} className="relative overflow-hidden border-t border-white/5">
+      <div className="max-w-[1180px] mx-auto px-6 lg:px-10 py-20">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={isInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6 }} className="text-center mb-12">
+          <span className="text-[11px] font-mono uppercase tracking-wider text-[#A100FF]">Social Proof</span>
+          <h2 className="mt-4 text-3xl sm:text-4xl font-black">Empresas que j\u00e1 <em className="not-italic text-[#A100FF]">transformaram</em></h2>
+        </motion.div>
+
+        {/* Logos */}
+        <motion.div initial={{ opacity: 0 }} animate={isInView ? { opacity: 1 } : {}} transition={{ duration: 0.6, delay: 0.1 }} className="flex flex-wrap justify-center gap-8 mb-12">
+          {logos.map((logo, i) => (
+            <div key={i} className="px-5 py-3 bg-[#111] border border-white/5 text-white/30 text-sm font-semibold">
+              {logo}
+            </div>
+          ))}
+        </motion.div>
+
+        {/* Depoimentos */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-[2px]">
+          {testimonials.map((t, i) => (
+            <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={isInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, delay: 0.15 + i * 0.1 }} className="bg-[#111] p-6">
+              <p className="text-sm text-white/60 leading-relaxed mb-4 italic">\"{t.quote}\"</p>
+              <div>
+                <span className="text-xs font-semibold text-white">{t.author}</span>
+                <span className="text-[10px] text-white/30 block">{t.company}</span>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ===== CTA FINAL ===== */
-function CTASection({ onExport }: { onExport: () => void }) {
+function CTASection({ onExport, companyName }: { onExport: () => void; companyName: string }) {
+  const createProposta = trpc.proposta.create.useMutation();
+
+  const handleShareLink = async () => {
+    if (companyName === "Sua Empresa") {
+      toast.error("Personalize o nome da empresa no topo antes de gerar o link.");
+      return;
+    }
+    try {
+      const result = await createProposta.mutateAsync({ empresaNome: companyName });
+      if (result.slug) {
+        const url = `${window.location.origin}/imersao/${result.slug}`;
+        navigator.clipboard.writeText(url);
+        toast.success(`Link copiado! Compartilhe: /imersao/${result.slug}`);
+      }
+    } catch {
+      toast.error("Erro ao gerar link. Tente novamente.");
+    }
+  };
+
   return (
     <section className="border-t border-white/5 py-20">
       <div className="max-w-[1180px] mx-auto px-6 lg:px-10 text-center">
         <h2 className="text-3xl sm:text-4xl font-black mb-4">
-          Pronto para a <em className="not-italic text-[#A100FF]">imersão</em>?
+          Pronto para a <em className="not-italic text-[#A100FF]">imers\u00e3o</em>?
         </h2>
         <p className="text-white/50 max-w-[500px] mx-auto mb-8">
           Não deixe sua empresa fazer parte dos 40% de projetos de IA cancelados. O futuro pertence a quem adapta a estrutura.
         </p>
-        <div className="flex gap-4 justify-center flex-wrap">
-          <Link href="/agendar" className="inline-flex items-center gap-2 px-8 py-4 bg-[#A100FF] text-white text-[17px] font-semibold hover:bg-[#8800DD] transition-colors">
-            Agendar Sessão de Descoberta <ArrowRight className="w-4 h-4" />
+        <div className="flex gap-3 justify-center flex-wrap">
+          <Link href="/agendar" className="inline-flex items-center gap-2 px-7 py-3.5 bg-[#A100FF] text-white text-[15px] font-semibold hover:bg-[#8800DD] transition-colors">
+            Agendar Sess\u00e3o <ArrowRight className="w-4 h-4" />
           </Link>
-          <button onClick={onExport} className="inline-flex items-center gap-2 px-8 py-4 border border-white/15 text-white/80 text-[17px] font-semibold hover:border-[#A100FF]/50 transition-colors">
-            <Download className="w-5 h-5" /> Exportar Proposta PDF
+          <button onClick={onExport} className="inline-flex items-center gap-2 px-7 py-3.5 border border-white/15 text-white/80 text-[15px] font-semibold hover:border-[#A100FF]/50 transition-colors">
+            <Download className="w-4 h-4" /> PDF
+          </button>
+          <button onClick={handleShareLink} disabled={createProposta.isPending} className="inline-flex items-center gap-2 px-7 py-3.5 border border-white/15 text-white/80 text-[15px] font-semibold hover:border-[#A100FF]/50 transition-colors disabled:opacity-50">
+            <LinkIcon className="w-4 h-4" /> {createProposta.isPending ? "Gerando..." : "Gerar Link"}
           </button>
         </div>
       </div>

@@ -8,7 +8,7 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { z } from "zod";
 import { getDb } from "./db";
-import { diagnosticos, leads, uploads } from "../drizzle/schema";
+import { diagnosticos, leads, uploads, propostas } from "../drizzle/schema";
 import { desc, eq, sql } from "drizzle-orm";
 import { storagePut } from "./storage";
 import { invokeLLM } from "./_core/llm";
@@ -357,6 +357,44 @@ Seja útil, objetivo e direcione para o diagnóstico ou agendamento quando aprop
         } catch (e) {
           return { reply: "Desculpe, estou com dificuldades t\u00e9cnicas no momento. Por favor, tente novamente em alguns instantes." };
         }
+      }),
+  }),
+
+  // ===== PROPOSTAS PERSONALIZADAS =====
+  proposta: router({
+    // Criar proposta com slug único
+    create: publicProcedure
+      .input(z.object({
+        empresaNome: z.string(),
+        planoSelecionado: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) return { slug: null };
+        const slug = nanoid(10);
+        await db.insert(propostas).values({
+          slug,
+          empresaNome: input.empresaNome,
+          planoSelecionado: input.planoSelecionado || null,
+        });
+        notifyOwner({
+          title: `Nova proposta criada: ${input.empresaNome}`,
+          content: `Empresa: ${input.empresaNome}\nPlano: ${input.planoSelecionado || "N/A"}\nLink: /imersao/${slug}`,
+        }).catch(() => {});
+        return { slug };
+      }),
+
+    // Obter proposta por slug (público)
+    getBySlug: publicProcedure
+      .input(z.object({ slug: z.string() }))
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) return null;
+        const result = await db.select().from(propostas).where(eq(propostas.slug, input.slug)).limit(1);
+        if (!result.length) return null;
+        // Incrementar visualizações
+        await db.update(propostas).set({ visualizacoes: (result[0].visualizacoes || 0) + 1 }).where(eq(propostas.slug, input.slug));
+        return result[0];
       }),
   }),
 });
