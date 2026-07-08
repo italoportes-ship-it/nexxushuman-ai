@@ -365,11 +365,67 @@ function OrgChartSection({ departments, setDepartments }: { departments: OrgDepa
           </div>
         )}
 
-        <div className="flex justify-center mb-8">
+        <div className="flex justify-center mb-2">
           <div className="w-14 h-14 mx-auto rounded-full flex items-center justify-center text-sm font-bold border-2 border-[#A100FF] text-[#A100FF] bg-black" style={{ boxShadow: "0 0 0 5px rgba(161,0,255,0.12), 0 0 26px -4px rgba(161,0,255,0.3)" }}>
             CEO
           </div>
         </div>
+
+        {/* SVG linhas animadas CEO -> Departamentos (modo apresentação) */}
+        {presentationMode && (
+          <div className="flex justify-center mb-4">
+            <svg className="w-full max-w-[900px] h-[60px]" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+              {departments.map((_, i) => {
+                const totalDepts = departments.length;
+                const x2 = totalDepts === 1 ? 50 : 10 + (i * 80) / (totalDepts - 1);
+                return (
+                  <motion.line
+                    key={i}
+                    x1="50" y1="0" x2={x2} y2="100"
+                    stroke="rgba(161,0,255,0.4)"
+                    strokeWidth="0.8"
+                    vectorEffect="non-scaling-stroke"
+                    initial={{ pathLength: 0, opacity: 0 }}
+                    animate={{ pathLength: 1, opacity: 1 }}
+                    transition={{ duration: 0.8, delay: 0.3 + i * 0.15, ease: "easeOut" }}
+                  />
+                );
+              })}
+              {/* Glow pulse nas linhas */}
+              {departments.map((_, i) => {
+                const totalDepts = departments.length;
+                const x2 = totalDepts === 1 ? 50 : 10 + (i * 80) / (totalDepts - 1);
+                return (
+                  <motion.line
+                    key={`glow-${i}`}
+                    x1="50" y1="0" x2={x2} y2="100"
+                    stroke="rgba(161,0,255,0.15)"
+                    strokeWidth="3"
+                    vectorEffect="non-scaling-stroke"
+                    initial={{ pathLength: 0, opacity: 0 }}
+                    animate={{ pathLength: 1, opacity: [0, 0.6, 0] }}
+                    transition={{ duration: 1.5, delay: 0.5 + i * 0.15, ease: "easeOut", repeat: Infinity, repeatDelay: 3 }}
+                  />
+                );
+              })}
+            </svg>
+          </div>
+        )}
+
+        {/* SVG linhas estáticas (modo edição) */}
+        {!presentationMode && (
+          <div className="flex justify-center mb-4">
+            <svg className="w-full max-w-[900px] h-[40px]" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+              {departments.map((_, i) => {
+                const totalDepts = departments.length;
+                const x2 = totalDepts === 1 ? 50 : 10 + (i * 80) / (totalDepts - 1);
+                return (
+                  <line key={i} x1="50" y1="0" x2={x2} y2="100" stroke="rgba(161,0,255,0.15)" strokeWidth="0.6" vectorEffect="non-scaling-stroke" />
+                );
+              })}
+            </svg>
+          </div>
+        )}
 
         {/* Dica de edição (oculta no modo apresentação) */}
         {!presentationMode && (
