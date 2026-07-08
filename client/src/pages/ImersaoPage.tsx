@@ -235,13 +235,47 @@ function WhatIsSection() {
   );
 }
 
-/* ===== ORGANOGRAMA EDITÁVEL ===== */
+// Templates de organograma por setor
+const ORG_TEMPLATES: Record<string, OrgDepartment[]> = {
+  financeiro: [
+    { name: "Compliance", lead: "CM", humans: 2, agents: 4, nodes: [{ label: "KYC Agent", color: "#A100FF" }, { label: "AML Monitor", color: "#EC4899" }, { label: "Regulatory", color: "#E5A833" }, { label: "Audit", color: "#4F8FF0" }] },
+    { name: "Opera\u00e7\u00f5es", lead: "OP", humans: 3, agents: 3, nodes: [{ label: "Concilia\u00e7\u00e3o", color: "#A100FF" }, { label: "Backoffice", color: "#A855F7" }, { label: "Cobran\u00e7a", color: "#E5A833" }] },
+    { name: "Cr\u00e9dito", lead: "CR", humans: 2, agents: 3, nodes: [{ label: "Scoring", color: "#A3CE3A" }, { label: "An\u00e1lise", color: "#4F8FF0" }, { label: "Fraude", color: "#EC4899" }] },
+    { name: "Atendimento", lead: "AT", humans: 2, agents: 3, nodes: [{ label: "Chat L1", color: "#A100FF" }, { label: "Escala\u00e7\u00e3o", color: "#E5A833" }, { label: "NPS", color: "#A855F7" }] },
+    { name: "Investimentos", lead: "IV", humans: 1, agents: 2, nodes: [{ label: "Advisory", color: "#4F8FF0" }, { label: "Report", color: "#A3CE3A" }] },
+  ],
+  saude: [
+    { name: "Atendimento", lead: "AT", humans: 2, agents: 4, nodes: [{ label: "Triagem", color: "#A100FF" }, { label: "Agendamento", color: "#EC4899" }, { label: "Follow-up", color: "#E5A833" }, { label: "SAC", color: "#4F8FF0" }] },
+    { name: "Cl\u00ednico", lead: "CL", humans: 3, agents: 2, nodes: [{ label: "Prontu\u00e1rio", color: "#A855F7" }, { label: "Prescri\u00e7\u00e3o", color: "#A3CE3A" }] },
+    { name: "Farmacovigil\u00e2ncia", lead: "FV", humans: 1, agents: 3, nodes: [{ label: "Eventos", color: "#EC4899" }, { label: "Sinal", color: "#A100FF" }, { label: "Report", color: "#E5A833" }] },
+    { name: "Qualidade", lead: "QA", humans: 2, agents: 3, nodes: [{ label: "Desvios", color: "#4F8FF0" }, { label: "CAPA", color: "#A855F7" }, { label: "Audit", color: "#A3CE3A" }] },
+    { name: "Supply Chain", lead: "SC", humans: 1, agents: 2, nodes: [{ label: "Rastreio", color: "#E5A833" }, { label: "Cold Chain", color: "#4F8FF0" }] },
+  ],
+  varejo: [
+    { name: "E-commerce", lead: "EC", humans: 2, agents: 4, nodes: [{ label: "Pricing", color: "#A100FF" }, { label: "Estoque", color: "#E5A833" }, { label: "Recomenda\u00e7\u00e3o", color: "#EC4899" }, { label: "Checkout", color: "#4F8FF0" }] },
+    { name: "Marketing", lead: "MK", humans: 2, agents: 3, nodes: [{ label: "Segmenta\u00e7\u00e3o", color: "#A855F7" }, { label: "Conte\u00fado", color: "#A3CE3A" }, { label: "CRM", color: "#E5A833" }] },
+    { name: "Atendimento", lead: "AT", humans: 3, agents: 3, nodes: [{ label: "Chat L1", color: "#A100FF" }, { label: "P\u00f3s-venda", color: "#EC4899" }, { label: "Devolu\u00e7\u00e3o", color: "#4F8FF0" }] },
+    { name: "Log\u00edstica", lead: "LG", humans: 2, agents: 2, nodes: [{ label: "Rota", color: "#A3CE3A" }, { label: "Tracking", color: "#A855F7" }] },
+    { name: "Financeiro", lead: "FN", humans: 1, agents: 2, nodes: [{ label: "Concilia\u00e7\u00e3o", color: "#E5A833" }, { label: "Fiscal", color: "#4F8FF0" }] },
+  ],
+  industria: [
+    { name: "Produ\u00e7\u00e3o", lead: "PR", humans: 3, agents: 4, nodes: [{ label: "Planejamento", color: "#A100FF" }, { label: "Qualidade", color: "#EC4899" }, { label: "Manuten\u00e7\u00e3o", color: "#E5A833" }, { label: "OEE", color: "#4F8FF0" }] },
+    { name: "Supply Chain", lead: "SC", humans: 2, agents: 3, nodes: [{ label: "Compras", color: "#A855F7" }, { label: "Estoque", color: "#A3CE3A" }, { label: "Fornecedor", color: "#E5A833" }] },
+    { name: "Engenharia", lead: "EN", humans: 2, agents: 2, nodes: [{ label: "Processo", color: "#A100FF" }, { label: "Automa\u00e7\u00e3o", color: "#4F8FF0" }] },
+    { name: "Qualidade", lead: "QA", humans: 2, agents: 3, nodes: [{ label: "Inspe\u00e7\u00e3o", color: "#EC4899" }, { label: "CAPA", color: "#A855F7" }, { label: "Calibra\u00e7\u00e3o", color: "#A3CE3A" }] },
+    { name: "EHS", lead: "EH", humans: 1, agents: 2, nodes: [{ label: "Seguran\u00e7a", color: "#E5A833" }, { label: "Meio Ambiente", color: "#A3CE3A" }] },
+  ],
+};
+
+/* ===== ORGANOGRAMA EDIT\u00c1VEL ===== */
 function OrgChartSection({ departments, setDepartments }: { departments: OrgDepartment[]; setDepartments: (d: OrgDepartment[]) => void }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-80px" });
   const [editingDept, setEditingDept] = useState<number | null>(null);
   const [showAddAgent, setShowAddAgent] = useState<number | null>(null);
   const [newAgentName, setNewAgentName] = useState("");
+  const [presentationMode, setPresentationMode] = useState(false);
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
 
   const updateDept = (index: number, partial: Partial<OrgDepartment>) => {
     const updated = [...departments];
@@ -275,6 +309,27 @@ function OrgChartSection({ departments, setDepartments }: { departments: OrgDepa
     setDepartments(departments.filter((_, i) => i !== index));
   };
 
+  // Drag and drop para reordenar departamentos
+  const handleDragStart = (index: number) => setDragIndex(index);
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    if (dragIndex === null || dragIndex === index) return;
+    const updated = [...departments];
+    const [moved] = updated.splice(dragIndex, 1);
+    updated.splice(index, 0, moved);
+    setDepartments(updated);
+    setDragIndex(index);
+  };
+  const handleDragEnd = () => setDragIndex(null);
+
+  // Aplicar template
+  const applyTemplate = (key: string) => {
+    if (ORG_TEMPLATES[key]) {
+      setDepartments(JSON.parse(JSON.stringify(ORG_TEMPLATES[key])));
+      toast.success(`Template "${key}" aplicado!`);
+    }
+  };
+
   return (
     <section ref={ref} className="relative overflow-hidden border-t border-white/5">
       <div className="max-w-[1180px] mx-auto px-6 lg:px-10 py-20">
@@ -286,87 +341,140 @@ function OrgChartSection({ departments, setDepartments }: { departments: OrgDepa
             Sua estrutura operacional <em className="not-italic text-[#A100FF]">agêntica</em>
           </h2>
         </motion.div>
+        {/* Toolbar: Templates + Modo Apresentação */}
+        {!presentationMode && (
+          <div className="flex flex-wrap items-center justify-center gap-2 mb-6">
+            <span className="text-[10px] text-white/30 mr-2">Templates:</span>
+            {Object.keys(ORG_TEMPLATES).map(key => (
+              <button key={key} onClick={() => applyTemplate(key)} className="text-[10px] px-3 py-1.5 bg-[#111] border border-white/10 text-white/50 hover:border-[#A100FF]/50 hover:text-[#A100FF] transition-colors capitalize">
+                {key}
+              </button>
+            ))}
+            <button onClick={() => setPresentationMode(true)} className="text-[10px] px-3 py-1.5 bg-[#A100FF]/10 border border-[#A100FF]/30 text-[#A100FF] hover:bg-[#A100FF]/20 transition-colors ml-4">
+              Modo Apresentação
+            </button>
+          </div>
+        )}
+
+        {/* Botão sair do modo apresentação */}
+        {presentationMode && (
+          <div className="text-center mb-6">
+            <button onClick={() => setPresentationMode(false)} className="text-[10px] px-4 py-2 bg-white/5 border border-white/10 text-white/50 hover:text-white transition-colors">
+              ← Sair do Modo Apresentação
+            </button>
+          </div>
+        )}
+
         <div className="flex justify-center mb-8">
           <div className="w-14 h-14 mx-auto rounded-full flex items-center justify-center text-sm font-bold border-2 border-[#A100FF] text-[#A100FF] bg-black" style={{ boxShadow: "0 0 0 5px rgba(161,0,255,0.12), 0 0 26px -4px rgba(161,0,255,0.3)" }}>
             CEO
           </div>
         </div>
-        {/* Dica de edição */}
-        <div className="text-center mb-6">
-          <span className="text-[10px] text-white/30">Clique nos nomes para editar · Use os botões + e × para adicionar/remover</span>
-        </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+        {/* Dica de edição (oculta no modo apresentação) */}
+        {!presentationMode && (
+          <div className="text-center mb-6">
+            <span className="text-[10px] text-white/30">Arraste para reordenar · Clique nos nomes para editar · + e × para adicionar/remover</span>
+          </div>
+        )}
+
+        <div className={`grid gap-4 ${presentationMode ? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6" : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-5"}`}>
           {departments.map((dept, i) => (
-            <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={isInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, delay: i * 0.08 }} className="text-center relative group">
-              {/* Botão remover departamento */}
-              <button onClick={() => removeDepartment(i)} className="absolute -top-2 -right-2 w-5 h-5 bg-red-500/20 text-red-400 text-[10px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center hover:bg-red-500/40" title="Remover departamento">×</button>
+            <motion.div
+              key={`${dept.name}-${i}`}
+              initial={{ opacity: 0, y: 20 }}
+              animate={isInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.5, delay: i * 0.08 }}
+              className={`text-center relative group ${!presentationMode ? "cursor-grab active:cursor-grabbing" : ""} ${dragIndex === i ? "opacity-50" : ""}`}
+              draggable={!presentationMode}
+              onDragStart={() => handleDragStart(i)}
+              onDragOver={(e) => handleDragOver(e, i)}
+              onDragEnd={handleDragEnd}
+            >
+              {/* Botão remover departamento (oculto no modo apresentação) */}
+              {!presentationMode && (
+                <button onClick={() => removeDepartment(i)} className="absolute -top-2 -right-2 w-5 h-5 bg-red-500/20 text-red-400 text-[10px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center hover:bg-red-500/40" title="Remover departamento">×</button>
+              )}
 
-              {/* Nome editável */}
-              <div
-                contentEditable
-                suppressContentEditableWarning
-                spellCheck={false}
-                onBlur={(e) => updateDept(i, { name: e.currentTarget.textContent || dept.name })}
-                className="text-[11px] font-semibold text-white/60 mb-3 outline-none border-b border-dashed border-transparent hover:border-white/20 focus:border-[#A100FF]/50 cursor-text px-1 transition-colors"
-              >
-                {dept.name}
-              </div>
+              {/* Nome */}
+              {presentationMode ? (
+                <div className="text-[12px] font-semibold text-white/70 mb-3">{dept.name}</div>
+              ) : (
+                <div
+                  contentEditable
+                  suppressContentEditableWarning
+                  spellCheck={false}
+                  onBlur={(e) => updateDept(i, { name: e.currentTarget.textContent || dept.name })}
+                  className="text-[11px] font-semibold text-white/60 mb-3 outline-none border-b border-dashed border-transparent hover:border-white/20 focus:border-[#A100FF]/50 cursor-text px-1 transition-colors"
+                >
+                  {dept.name}
+                </div>
+              )}
 
-              {/* Líder editável */}
-              <div
-                contentEditable
-                suppressContentEditableWarning
-                spellCheck={false}
-                onBlur={(e) => updateDept(i, { lead: e.currentTarget.textContent || dept.lead })}
-                className="w-10 h-10 mx-auto rounded-full flex items-center justify-center text-xs font-bold mb-2 border border-white/20 text-white/60 bg-black outline-none hover:border-[#A100FF]/30 focus:border-[#A100FF] cursor-text transition-colors"
-              >
-                {dept.lead}
-              </div>
+              {/* Líder */}
+              {presentationMode ? (
+                <div className="w-11 h-11 mx-auto rounded-full flex items-center justify-center text-xs font-bold mb-2 border border-white/20 text-white/60 bg-black">{dept.lead}</div>
+              ) : (
+                <div
+                  contentEditable
+                  suppressContentEditableWarning
+                  spellCheck={false}
+                  onBlur={(e) => updateDept(i, { lead: e.currentTarget.textContent || dept.lead })}
+                  className="w-10 h-10 mx-auto rounded-full flex items-center justify-center text-xs font-bold mb-2 border border-white/20 text-white/60 bg-black outline-none hover:border-[#A100FF]/30 focus:border-[#A100FF] cursor-text transition-colors"
+                >
+                  {dept.lead}
+                </div>
+              )}
 
               <div className="text-[10px] text-white/40 mb-3">{dept.humans}H · {dept.nodes.length}A</div>
 
               {/* Agentes */}
               <div className="space-y-2">
                 {dept.nodes.map((node, j) => (
-                  <div key={j} className="flex items-center justify-center gap-1.5 group/agent">
-                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold bg-black shrink-0" style={{ border: `1.5px solid ${node.color}`, color: node.color, boxShadow: `${node.color} 0 0 12px -3px` }}>
+                  <div key={j} className={`flex items-center justify-center gap-1.5 ${!presentationMode ? "group/agent" : ""}`}>
+                    <div className={`rounded-full flex items-center justify-center text-[10px] font-bold bg-black shrink-0 ${presentationMode ? "w-8 h-8" : "w-7 h-7"}`} style={{ border: `1.5px solid ${node.color}`, color: node.color, boxShadow: `${node.color} 0 0 12px -3px` }}>
                       {node.label[0]}
                     </div>
-                    <span className="text-[10px] text-white/50">{node.label}</span>
-                    <button onClick={() => removeAgent(i, j)} className="w-4 h-4 text-[8px] text-red-400/60 hover:text-red-400 opacity-0 group-hover/agent:opacity-100 transition-opacity" title="Remover agente">×</button>
+                    <span className={`text-white/50 ${presentationMode ? "text-[11px]" : "text-[10px]"}`}>{node.label}</span>
+                    {!presentationMode && (
+                      <button onClick={() => removeAgent(i, j)} className="w-4 h-4 text-[8px] text-red-400/60 hover:text-red-400 opacity-0 group-hover/agent:opacity-100 transition-opacity" title="Remover agente">×</button>
+                    )}
                   </div>
                 ))}
 
-                {/* Adicionar agente */}
-                {showAddAgent === i ? (
-                  <div className="flex items-center gap-1 mt-2">
-                    <input
-                      type="text"
-                      value={newAgentName}
-                      onChange={(e) => setNewAgentName(e.target.value)}
-                      onKeyDown={(e) => e.key === "Enter" && addAgent(i)}
-                      placeholder="Nome..."
-                      className="w-full bg-black border border-white/10 text-[10px] text-white px-2 py-1 outline-none focus:border-[#A100FF]/50"
-                      autoFocus
-                    />
-                    <button onClick={() => addAgent(i)} className="text-[10px] text-[#A100FF] font-bold px-1">✓</button>
-                    <button onClick={() => { setShowAddAgent(null); setNewAgentName(""); }} className="text-[10px] text-white/30 px-1">×</button>
-                  </div>
-                ) : (
-                  <button onClick={() => setShowAddAgent(i)} className="text-[10px] text-[#A100FF]/50 hover:text-[#A100FF] transition-colors mt-2">+ agente</button>
+                {/* Adicionar agente (oculto no modo apresentação) */}
+                {!presentationMode && (
+                  showAddAgent === i ? (
+                    <div className="flex items-center gap-1 mt-2">
+                      <input
+                        type="text"
+                        value={newAgentName}
+                        onChange={(e) => setNewAgentName(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && addAgent(i)}
+                        placeholder="Nome..."
+                        className="w-full bg-black border border-white/10 text-[10px] text-white px-2 py-1 outline-none focus:border-[#A100FF]/50"
+                        autoFocus
+                      />
+                      <button onClick={() => addAgent(i)} className="text-[10px] text-[#A100FF] font-bold px-1">✓</button>
+                      <button onClick={() => { setShowAddAgent(null); setNewAgentName(""); }} className="text-[10px] text-white/30 px-1">×</button>
+                    </div>
+                  ) : (
+                    <button onClick={() => setShowAddAgent(i)} className="text-[10px] text-[#A100FF]/50 hover:text-[#A100FF] transition-colors mt-2">+ agente</button>
+                  )
                 )}
               </div>
             </motion.div>
           ))}
 
-          {/* Botão adicionar departamento */}
-          <motion.div initial={{ opacity: 0 }} animate={isInView ? { opacity: 1 } : {}} className="flex items-center justify-center">
-            <button onClick={addDepartment} className="w-full h-full min-h-[120px] border border-dashed border-white/10 hover:border-[#A100FF]/30 flex flex-col items-center justify-center gap-2 transition-colors group">
-              <span className="text-2xl text-white/20 group-hover:text-[#A100FF] transition-colors">+</span>
-              <span className="text-[10px] text-white/30 group-hover:text-white/50">Departamento</span>
-            </button>
-          </motion.div>
+          {/* Botão adicionar departamento (oculto no modo apresentação) */}
+          {!presentationMode && (
+            <motion.div initial={{ opacity: 0 }} animate={isInView ? { opacity: 1 } : {}} className="flex items-center justify-center">
+              <button onClick={addDepartment} className="w-full h-full min-h-[120px] border border-dashed border-white/10 hover:border-[#A100FF]/30 flex flex-col items-center justify-center gap-2 transition-colors group">
+                <span className="text-2xl text-white/20 group-hover:text-[#A100FF] transition-colors">+</span>
+                <span className="text-[10px] text-white/30 group-hover:text-white/50">Departamento</span>
+              </button>
+            </motion.div>
+          )}
         </div>
       </div>
     </section>
