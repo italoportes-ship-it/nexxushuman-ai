@@ -18,9 +18,24 @@ import jsPDF from "jspdf";
 
 const ACCENT = "#A100FF"; // Violeta — identidade visual do site
 
+// Tipo para departamentos editáveis
+interface OrgNode { label: string; color: string; }
+interface OrgDepartment { name: string; lead: string; humans: number; agents: number; nodes: OrgNode[]; }
+
+const defaultDepartments: OrgDepartment[] = [
+  { name: "Marketing", lead: "LP", humans: 2, agents: 3, nodes: [{ label: "Content", color: "#E5A833" }, { label: "Benchmark", color: "#EC4899" }, { label: "Social", color: "#A855F7" }] },
+  { name: "People", lead: "JR", humans: 1, agents: 4, nodes: [{ label: "Recruiter", color: "#A855F7" }, { label: "Onboarding", color: "#A855F7" }, { label: "Culture", color: "#EC4899" }] },
+  { name: "Customer Success", lead: "RT", humans: 2, agents: 3, nodes: [{ label: "Health Score", color: "#E5A833" }, { label: "CS Onboard", color: "#A100FF" }, { label: "NPS", color: "#4F8FF0" }] },
+  { name: "Operações", lead: "MS", humans: 1, agents: 2, nodes: [{ label: "Transcriber", color: "#A100FF" }, { label: "Tracker", color: "#A3CE3A" }] },
+  { name: "Financeiro", lead: "PL", humans: 1, agents: 2, nodes: [{ label: "Finance", color: "#E5A833" }, { label: "Invoice", color: "#A100FF" }] },
+];
+
+const AGENT_COLORS = ["#A100FF", "#E5A833", "#EC4899", "#A855F7", "#4F8FF0", "#A3CE3A", "#33ADE5"];
+
 export default function ImersaoPage() {
   const { lang } = useLanguage();
   const [companyName, setCompanyName] = useState("Sua Empresa");
+  const [departments, setDepartments] = useState<OrgDepartment[]>(defaultDepartments);
 
   // Carregar proposta personalizada se acessado via /imersao/:slug
   const path = typeof window !== "undefined" ? window.location.pathname : "";
@@ -31,9 +46,15 @@ export default function ImersaoPage() {
     { enabled: !!slug, refetchOnWindowFocus: false }
   );
 
-  // Atualizar nome quando proposta carrega
+  // Atualizar dados quando proposta carrega
   if (proposta && proposta.empresaNome && companyName === "Sua Empresa") {
     setCompanyName(proposta.empresaNome);
+    if (proposta.dadosExtras) {
+      try {
+        const extras = JSON.parse(proposta.dadosExtras);
+        if (extras.departments) setDepartments(extras.departments);
+      } catch {}
+    }
   }
 
   // Exportar proposta em PDF
@@ -126,13 +147,13 @@ export default function ImersaoPage() {
       <main>
         <HeroSection companyName={companyName} setCompanyName={setCompanyName} />
         <WhatIsSection />
-        <OrgChartSection />
+        <OrgChartSection departments={departments} setDepartments={setDepartments} />
         <ServicesCatalog />
         <SocialProofSection />
         <ToolsHub />
         <PricingSection companyName={companyName} />
         <TimelineSection />
-        <CTASection onExport={handleExportPDF} companyName={companyName} />
+        <CTASection onExport={handleExportPDF} companyName={companyName} departments={departments} />
       </main>
     </div>
   );
@@ -214,17 +235,45 @@ function WhatIsSection() {
   );
 }
 
-/* ===== ORGANOGRAMA ===== */
-function OrgChartSection() {
+/* ===== ORGANOGRAMA EDITÁVEL ===== */
+function OrgChartSection({ departments, setDepartments }: { departments: OrgDepartment[]; setDepartments: (d: OrgDepartment[]) => void }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-80px" });
-  const departments = [
-    { name: "Marketing", lead: "LP", humans: 2, agents: 3, nodes: [{ label: "Content", color: "#E5A833" }, { label: "Benchmark", color: "#EC4899" }, { label: "Social", color: "#A855F7" }] },
-    { name: "People", lead: "JR", humans: 1, agents: 4, nodes: [{ label: "Recruiter", color: "#A855F7" }, { label: "Onboarding", color: "#A855F7" }, { label: "Culture", color: "#EC4899" }] },
-    { name: "Customer Success", lead: "RT", humans: 2, agents: 3, nodes: [{ label: "Health Score", color: "#E5A833" }, { label: "CS Onboard", color: "#A100FF" }, { label: "NPS", color: "#4F8FF0" }] },
-    { name: "Operações", lead: "MS", humans: 1, agents: 2, nodes: [{ label: "Transcriber", color: "#A100FF" }, { label: "Tracker", color: "#A3CE3A" }] },
-    { name: "Financeiro", lead: "PL", humans: 1, agents: 2, nodes: [{ label: "Finance", color: "#E5A833" }, { label: "Invoice", color: "#A100FF" }] },
-  ];
+  const [editingDept, setEditingDept] = useState<number | null>(null);
+  const [showAddAgent, setShowAddAgent] = useState<number | null>(null);
+  const [newAgentName, setNewAgentName] = useState("");
+
+  const updateDept = (index: number, partial: Partial<OrgDepartment>) => {
+    const updated = [...departments];
+    updated[index] = { ...updated[index], ...partial };
+    setDepartments(updated);
+  };
+
+  const addAgent = (deptIndex: number) => {
+    if (!newAgentName.trim()) return;
+    const updated = [...departments];
+    const color = AGENT_COLORS[updated[deptIndex].nodes.length % AGENT_COLORS.length];
+    updated[deptIndex].nodes.push({ label: newAgentName.trim(), color });
+    updated[deptIndex].agents = updated[deptIndex].nodes.length;
+    setDepartments(updated);
+    setNewAgentName("");
+    setShowAddAgent(null);
+  };
+
+  const removeAgent = (deptIndex: number, nodeIndex: number) => {
+    const updated = [...departments];
+    updated[deptIndex].nodes.splice(nodeIndex, 1);
+    updated[deptIndex].agents = updated[deptIndex].nodes.length;
+    setDepartments(updated);
+  };
+
+  const addDepartment = () => {
+    setDepartments([...departments, { name: "Novo Dept", lead: "??", humans: 1, agents: 0, nodes: [] }]);
+  };
+
+  const removeDepartment = (index: number) => {
+    setDepartments(departments.filter((_, i) => i !== index));
+  };
 
   return (
     <section ref={ref} className="relative overflow-hidden border-t border-white/5">
@@ -242,24 +291,82 @@ function OrgChartSection() {
             CEO
           </div>
         </div>
+        {/* Dica de edição */}
+        <div className="text-center mb-6">
+          <span className="text-[10px] text-white/30">Clique nos nomes para editar · Use os botões + e × para adicionar/remover</span>
+        </div>
+
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
           {departments.map((dept, i) => (
-            <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={isInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, delay: i * 0.08 }} className="text-center">
-              <div className="text-[11px] font-semibold text-white/60 mb-3">{dept.name}</div>
-              <div className="w-10 h-10 mx-auto rounded-full flex items-center justify-center text-xs font-bold mb-2 border border-white/20 text-white/60 bg-black">{dept.lead}</div>
-              <div className="text-[10px] text-white/40 mb-3">{dept.humans}H · {dept.agents}A</div>
+            <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={isInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, delay: i * 0.08 }} className="text-center relative group">
+              {/* Botão remover departamento */}
+              <button onClick={() => removeDepartment(i)} className="absolute -top-2 -right-2 w-5 h-5 bg-red-500/20 text-red-400 text-[10px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center hover:bg-red-500/40" title="Remover departamento">×</button>
+
+              {/* Nome editável */}
+              <div
+                contentEditable
+                suppressContentEditableWarning
+                spellCheck={false}
+                onBlur={(e) => updateDept(i, { name: e.currentTarget.textContent || dept.name })}
+                className="text-[11px] font-semibold text-white/60 mb-3 outline-none border-b border-dashed border-transparent hover:border-white/20 focus:border-[#A100FF]/50 cursor-text px-1 transition-colors"
+              >
+                {dept.name}
+              </div>
+
+              {/* Líder editável */}
+              <div
+                contentEditable
+                suppressContentEditableWarning
+                spellCheck={false}
+                onBlur={(e) => updateDept(i, { lead: e.currentTarget.textContent || dept.lead })}
+                className="w-10 h-10 mx-auto rounded-full flex items-center justify-center text-xs font-bold mb-2 border border-white/20 text-white/60 bg-black outline-none hover:border-[#A100FF]/30 focus:border-[#A100FF] cursor-text transition-colors"
+              >
+                {dept.lead}
+              </div>
+
+              <div className="text-[10px] text-white/40 mb-3">{dept.humans}H · {dept.nodes.length}A</div>
+
+              {/* Agentes */}
               <div className="space-y-2">
                 {dept.nodes.map((node, j) => (
-                  <div key={j} className="flex items-center justify-center gap-1.5">
-                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold bg-black" style={{ border: `1.5px solid ${node.color}`, color: node.color, boxShadow: `${node.color} 0 0 12px -3px` }}>
+                  <div key={j} className="flex items-center justify-center gap-1.5 group/agent">
+                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold bg-black shrink-0" style={{ border: `1.5px solid ${node.color}`, color: node.color, boxShadow: `${node.color} 0 0 12px -3px` }}>
                       {node.label[0]}
                     </div>
                     <span className="text-[10px] text-white/50">{node.label}</span>
+                    <button onClick={() => removeAgent(i, j)} className="w-4 h-4 text-[8px] text-red-400/60 hover:text-red-400 opacity-0 group-hover/agent:opacity-100 transition-opacity" title="Remover agente">×</button>
                   </div>
                 ))}
+
+                {/* Adicionar agente */}
+                {showAddAgent === i ? (
+                  <div className="flex items-center gap-1 mt-2">
+                    <input
+                      type="text"
+                      value={newAgentName}
+                      onChange={(e) => setNewAgentName(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && addAgent(i)}
+                      placeholder="Nome..."
+                      className="w-full bg-black border border-white/10 text-[10px] text-white px-2 py-1 outline-none focus:border-[#A100FF]/50"
+                      autoFocus
+                    />
+                    <button onClick={() => addAgent(i)} className="text-[10px] text-[#A100FF] font-bold px-1">✓</button>
+                    <button onClick={() => { setShowAddAgent(null); setNewAgentName(""); }} className="text-[10px] text-white/30 px-1">×</button>
+                  </div>
+                ) : (
+                  <button onClick={() => setShowAddAgent(i)} className="text-[10px] text-[#A100FF]/50 hover:text-[#A100FF] transition-colors mt-2">+ agente</button>
+                )}
               </div>
             </motion.div>
           ))}
+
+          {/* Botão adicionar departamento */}
+          <motion.div initial={{ opacity: 0 }} animate={isInView ? { opacity: 1 } : {}} className="flex items-center justify-center">
+            <button onClick={addDepartment} className="w-full h-full min-h-[120px] border border-dashed border-white/10 hover:border-[#A100FF]/30 flex flex-col items-center justify-center gap-2 transition-colors group">
+              <span className="text-2xl text-white/20 group-hover:text-[#A100FF] transition-colors">+</span>
+              <span className="text-[10px] text-white/30 group-hover:text-white/50">Departamento</span>
+            </button>
+          </motion.div>
         </div>
       </div>
     </section>
@@ -521,7 +628,7 @@ function SocialProofSection() {
 }
 
 /* ===== CTA FINAL ===== */
-function CTASection({ onExport, companyName }: { onExport: () => void; companyName: string }) {
+function CTASection({ onExport, companyName, departments }: { onExport: () => void; companyName: string; departments: OrgDepartment[] }) {
   const createProposta = trpc.proposta.create.useMutation();
 
   const handleShareLink = async () => {
@@ -530,7 +637,10 @@ function CTASection({ onExport, companyName }: { onExport: () => void; companyNa
       return;
     }
     try {
-      const result = await createProposta.mutateAsync({ empresaNome: companyName });
+      const result = await createProposta.mutateAsync({
+        empresaNome: companyName,
+        dadosExtras: JSON.stringify({ departments }),
+      });
       if (result.slug) {
         const url = `${window.location.origin}/imersao/${result.slug}`;
         navigator.clipboard.writeText(url);

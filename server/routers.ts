@@ -367,6 +367,7 @@ Seja útil, objetivo e direcione para o diagnóstico ou agendamento quando aprop
       .input(z.object({
         empresaNome: z.string(),
         planoSelecionado: z.string().optional(),
+        dadosExtras: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
         const db = await getDb();
@@ -376,6 +377,7 @@ Seja útil, objetivo e direcione para o diagnóstico ou agendamento quando aprop
           slug,
           empresaNome: input.empresaNome,
           planoSelecionado: input.planoSelecionado || null,
+          dadosExtras: input.dadosExtras || null,
         });
         notifyOwner({
           title: `Nova proposta criada: ${input.empresaNome}`,
