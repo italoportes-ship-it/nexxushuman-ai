@@ -20,6 +20,7 @@ import MeusDiagnosticos from "./pages/MeusDiagnosticos";
 import ResultadoPublico from "./pages/ResultadoPublico";
 import AgendarPage from "./pages/AgendarPage";
 import WebinarPage from "./pages/WebinarPage";
+import ImersaoPage from "./pages/ImersaoPage";
 import ChatWidget from "./components/ChatWidget";
 import DiagnosticoLanding from "./pages/DiagnosticoLanding";
 import Resultado from "./pages/Resultado";
@@ -45,6 +46,7 @@ function Router() {
       <Route path="/resultado/:id" component={ResultadoPublico} />
       <Route path="/agendar" component={AgendarPage} />
       <Route path="/webinar" component={WebinarPage} />
+      <Route path="/imersao" component={ImersaoPage} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>
