@@ -270,6 +270,7 @@ const ORG_TEMPLATES: Record<string, OrgDepartment[]> = {
 /* ===== ORGANOGRAMA EDIT\u00c1VEL ===== */
 function OrgChartSection({ departments, setDepartments }: { departments: OrgDepartment[]; setDepartments: (d: OrgDepartment[]) => void }) {
   const ref = useRef(null);
+  const orgRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-80px" });
   const [editingDept, setEditingDept] = useState<number | null>(null);
   const [showAddAgent, setShowAddAgent] = useState<number | null>(null);
@@ -277,10 +278,60 @@ function OrgChartSection({ departments, setDepartments }: { departments: OrgDepa
   const [presentationMode, setPresentationMode] = useState(false);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
 
+  // Undo/Redo
+  const [history, setHistory] = useState<OrgDepartment[][]>([JSON.parse(JSON.stringify(departments))]);
+  const [historyIndex, setHistoryIndex] = useState(0);
+
+  const pushHistory = (newDepts: OrgDepartment[]) => {
+    const newHistory = history.slice(0, historyIndex + 1);
+    newHistory.push(JSON.parse(JSON.stringify(newDepts)));
+    if (newHistory.length > 30) newHistory.shift();
+    setHistory(newHistory);
+    setHistoryIndex(newHistory.length - 1);
+  };
+
+  const undo = () => {
+    if (historyIndex > 0) {
+      const newIndex = historyIndex - 1;
+      setHistoryIndex(newIndex);
+      setDepartments(JSON.parse(JSON.stringify(history[newIndex])));
+    }
+  };
+
+  const redo = () => {
+    if (historyIndex < history.length - 1) {
+      const newIndex = historyIndex + 1;
+      setHistoryIndex(newIndex);
+      setDepartments(JSON.parse(JSON.stringify(history[newIndex])));
+    }
+  };
+
+  // Exportar organograma como PNG
+  const exportPNG = async () => {
+    if (!orgRef.current) return;
+    try {
+      const html2canvas = (await import("html2canvas")).default;
+      const canvas = await html2canvas(orgRef.current, { backgroundColor: "#000000", scale: 2 });
+      const link = document.createElement("a");
+      link.download = "organograma-agentico.png";
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+      toast.success("Organograma exportado como PNG!");
+    } catch {
+      toast.error("Erro ao exportar. Tente novamente.");
+    }
+  };
+
+  // Contador
+  const totalHumans = departments.reduce((acc, d) => acc + d.humans, 0);
+  const totalAgents = departments.reduce((acc, d) => acc + d.nodes.length, 0);
+  const totalDepts = departments.length;
+
   const updateDept = (index: number, partial: Partial<OrgDepartment>) => {
     const updated = [...departments];
     updated[index] = { ...updated[index], ...partial };
     setDepartments(updated);
+    pushHistory(updated);
   };
 
   const addAgent = (deptIndex: number) => {
@@ -290,6 +341,7 @@ function OrgChartSection({ departments, setDepartments }: { departments: OrgDepa
     updated[deptIndex].nodes.push({ label: newAgentName.trim(), color });
     updated[deptIndex].agents = updated[deptIndex].nodes.length;
     setDepartments(updated);
+    pushHistory(updated);
     setNewAgentName("");
     setShowAddAgent(null);
   };
@@ -299,14 +351,19 @@ function OrgChartSection({ departments, setDepartments }: { departments: OrgDepa
     updated[deptIndex].nodes.splice(nodeIndex, 1);
     updated[deptIndex].agents = updated[deptIndex].nodes.length;
     setDepartments(updated);
+    pushHistory(updated);
   };
 
   const addDepartment = () => {
-    setDepartments([...departments, { name: "Novo Dept", lead: "??", humans: 1, agents: 0, nodes: [] }]);
+    const updated = [...departments, { name: "Novo Dept", lead: "??", humans: 1, agents: 0, nodes: [] }];
+    setDepartments(updated);
+    pushHistory(updated);
   };
 
   const removeDepartment = (index: number) => {
-    setDepartments(departments.filter((_, i) => i !== index));
+    const updated = departments.filter((_, i) => i !== index);
+    setDepartments(updated);
+    pushHistory(updated);
   };
 
   // Drag and drop para reordenar departamentos
@@ -341,30 +398,61 @@ function OrgChartSection({ departments, setDepartments }: { departments: OrgDepa
             Sua estrutura operacional <em className="not-italic text-[#A100FF]">agêntica</em>
           </h2>
         </motion.div>
-        {/* Toolbar: Templates + Modo Apresentação */}
+        {/* Contador de agentes */}
+        <div className="flex items-center justify-center gap-6 mb-6">
+          <div className="flex items-center gap-2">
+            <span className="text-2xl font-black text-[#A100FF]">{totalDepts}</span>
+            <span className="text-[10px] text-white/40 uppercase">Depts</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-2xl font-black text-white">{totalHumans}</span>
+            <span className="text-[10px] text-white/40 uppercase">Humanos</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-2xl font-black text-green-400">{totalAgents}</span>
+            <span className="text-[10px] text-white/40 uppercase">Agentes</span>
+          </div>
+        </div>
+
+        {/* Toolbar: Templates + Undo/Redo + Export + Modo Apresentação */}
         {!presentationMode && (
           <div className="flex flex-wrap items-center justify-center gap-2 mb-6">
-            <span className="text-[10px] text-white/30 mr-2">Templates:</span>
+            <span className="text-[10px] text-white/30 mr-1">Templates:</span>
             {Object.keys(ORG_TEMPLATES).map(key => (
               <button key={key} onClick={() => applyTemplate(key)} className="text-[10px] px-3 py-1.5 bg-[#111] border border-white/10 text-white/50 hover:border-[#A100FF]/50 hover:text-[#A100FF] transition-colors capitalize">
                 {key}
               </button>
             ))}
-            <button onClick={() => setPresentationMode(true)} className="text-[10px] px-3 py-1.5 bg-[#A100FF]/10 border border-[#A100FF]/30 text-[#A100FF] hover:bg-[#A100FF]/20 transition-colors ml-4">
-              Modo Apresentação
+            <span className="w-px h-4 bg-white/10 mx-2" />
+            <button onClick={undo} disabled={historyIndex <= 0} className="text-[10px] px-2 py-1.5 bg-[#111] border border-white/10 text-white/50 hover:text-white transition-colors disabled:opacity-30" title="Desfazer (Ctrl+Z)">
+              ↩
+            </button>
+            <button onClick={redo} disabled={historyIndex >= history.length - 1} className="text-[10px] px-2 py-1.5 bg-[#111] border border-white/10 text-white/50 hover:text-white transition-colors disabled:opacity-30" title="Refazer (Ctrl+Y)">
+              ↪
+            </button>
+            <button onClick={exportPNG} className="text-[10px] px-3 py-1.5 bg-[#111] border border-white/10 text-white/50 hover:border-[#A100FF]/50 hover:text-[#A100FF] transition-colors" title="Exportar PNG">
+              PNG
+            </button>
+            <span className="w-px h-4 bg-white/10 mx-2" />
+            <button onClick={() => setPresentationMode(true)} className="text-[10px] px-3 py-1.5 bg-[#A100FF]/10 border border-[#A100FF]/30 text-[#A100FF] hover:bg-[#A100FF]/20 transition-colors">
+              Apresentação
             </button>
           </div>
         )}
 
         {/* Botão sair do modo apresentação */}
         {presentationMode && (
-          <div className="text-center mb-6">
+          <div className="flex items-center justify-center gap-3 mb-6">
             <button onClick={() => setPresentationMode(false)} className="text-[10px] px-4 py-2 bg-white/5 border border-white/10 text-white/50 hover:text-white transition-colors">
-              ← Sair do Modo Apresentação
+              ← Sair
+            </button>
+            <button onClick={exportPNG} className="text-[10px] px-4 py-2 bg-[#A100FF]/10 border border-[#A100FF]/30 text-[#A100FF] hover:bg-[#A100FF]/20 transition-colors">
+              Exportar PNG
             </button>
           </div>
         )}
 
+        <div ref={orgRef}>
         <div className="flex justify-center mb-2">
           <div className="w-14 h-14 mx-auto rounded-full flex items-center justify-center text-sm font-bold border-2 border-[#A100FF] text-[#A100FF] bg-black" style={{ boxShadow: "0 0 0 5px rgba(161,0,255,0.12), 0 0 26px -4px rgba(161,0,255,0.3)" }}>
             CEO
@@ -532,6 +620,7 @@ function OrgChartSection({ departments, setDepartments }: { departments: OrgDepa
             </motion.div>
           )}
         </div>
+        </div>{/* fecha orgRef */}
       </div>
     </section>
   );
