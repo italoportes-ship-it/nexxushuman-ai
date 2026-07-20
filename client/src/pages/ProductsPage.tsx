@@ -72,6 +72,9 @@ export default function ProductsPage() {
         {/* Recursos */}
         <ResourcesSection lang={lang} />
 
+        {/* Biblioteca de Agentes */}
+        <AgentsLibrarySection lang={lang} />
+
         {/* Tabela de Preços */}
         <PricingSection lang={lang} />
 
@@ -691,6 +694,141 @@ function PricingSection({ lang }: { lang: string }) {
             </motion.div>
           ))}
         </div>
+      </div>
+    </section>
+  );
+}
+
+/* ===== Biblioteca de Agentes — 8 agentes comercializáveis ===== */
+function AgentsLibrarySection({ lang }: { lang: string }) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-80px" });
+
+  const agents = [
+    {
+      name: "SDR Agent",
+      func: lang === "pt" ? "Pesquisa leads, prepara abordagem, qualifica contas" : "Researches leads, prepares approach, qualifies accounts",
+      target: lang === "pt" ? "B2B comercial" : "B2B commercial",
+      model: lang === "pt" ? "Projeto + mensalidade" : "Project + monthly",
+      icon: TrendingUp,
+      color: "#A100FF",
+    },
+    {
+      name: "Customer Support Agent",
+      func: lang === "pt" ? "Responde d\u00favidas, triagem, resumo de tickets" : "Answers questions, triage, ticket summary",
+      target: lang === "pt" ? "Atendimento" : "Customer Service",
+      model: lang === "pt" ? "Setup + consumo" : "Setup + consumption",
+      icon: Users,
+      color: "#4F8FF0",
+    },
+    {
+      name: "Knowledge Agent",
+      func: lang === "pt" ? "Busca e sintetiza conhecimento interno" : "Searches and synthesizes internal knowledge",
+      target: lang === "pt" ? "Empresas com documentos dispersos" : "Companies with scattered documents",
+      model: lang === "pt" ? "Setup + assinatura" : "Setup + subscription",
+      icon: Brain,
+      color: "#E5A833",
+    },
+    {
+      name: "Proposal Agent",
+      func: lang === "pt" ? "Gera propostas, escopos e minutas comerciais" : "Generates proposals, scopes and commercial drafts",
+      target: lang === "pt" ? "Servi\u00e7os profissionais" : "Professional services",
+      model: lang === "pt" ? "Setup + assinatura" : "Setup + subscription",
+      icon: Code,
+      color: "#A855F7",
+    },
+    {
+      name: "Meeting Intelligence Agent",
+      func: lang === "pt" ? "Resume reuni\u00f5es, extrai tarefas, atualiza CRM" : "Summarizes meetings, extracts tasks, updates CRM",
+      target: lang === "pt" ? "Times comerciais e opera\u00e7\u00f5es" : "Sales and operations teams",
+      model: lang === "pt" ? "Licen\u00e7a mensal" : "Monthly license",
+      icon: BarChart3,
+      color: "#EC4899",
+    },
+    {
+      name: "Finance Ops Agent",
+      func: lang === "pt" ? "Classifica documentos, apoia contas a pagar/receber" : "Classifies documents, supports accounts payable/receivable",
+      target: lang === "pt" ? "Financeiro" : "Finance",
+      model: lang === "pt" ? "Projeto + mensalidade" : "Project + monthly",
+      icon: Database,
+      color: "#A3CE3A",
+    },
+    {
+      name: "HR Onboarding Agent",
+      func: lang === "pt" ? "Apoia onboarding e FAQs internas" : "Supports onboarding and internal FAQs",
+      target: "RH/People",
+      model: lang === "pt" ? "Setup + assinatura" : "Setup + subscription",
+      icon: Bot,
+      color: "#33ADE5",
+    },
+    {
+      name: "Compliance/LGPD Agent",
+      func: lang === "pt" ? "Ajuda a consultar pol\u00edticas e orientar usu\u00e1rios" : "Helps consult policies and guide users",
+      target: lang === "pt" ? "Empresas reguladas" : "Regulated companies",
+      model: lang === "pt" ? "Projeto + assinatura" : "Project + subscription",
+      icon: Shield,
+      color: "#F59E0B",
+    },
+  ];
+
+  return (
+    <section ref={ref} className="py-20 bg-black border-t border-white/5">
+      <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={isInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6 }} className="text-center mb-12">
+          <span className="text-[11px] font-bold tracking-[0.2em] uppercase text-[#A100FF]">
+            {lang === "pt" ? "Biblioteca de Agentes" : "Agent Library"}
+          </span>
+          <h2 className="mt-4 text-3xl sm:text-4xl font-black text-white">
+            {lang === "pt" ? "8 agentes prontos para " : "8 agents ready to "}
+            <em className="not-italic text-[#A100FF]">{lang === "pt" ? "comercializar" : "deploy"}</em>
+          </h2>
+          <p className="mt-3 text-white/50 max-w-[600px] mx-auto text-sm">
+            {lang === "pt"
+              ? "Agentes replic\u00e1veis, de baixa depend\u00eancia setorial e alto ROI percebido. Prontos para implementa\u00e7\u00e3o imediata."
+              : "Replicable agents with low sector dependency and high perceived ROI. Ready for immediate deployment."}
+          </p>
+        </motion.div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[2px]">
+          {agents.map((agent, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 20 }}
+              animate={isInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.5, delay: i * 0.06 }}
+              className="bg-[#111] p-6 flex flex-col hover:bg-[#1a1a1a] transition-colors group"
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-9 h-9 flex items-center justify-center" style={{ background: `${agent.color}14`, border: `1px solid ${agent.color}30` }}>
+                  <agent.icon className="w-4 h-4" style={{ color: agent.color }} />
+                </div>
+                <h3 className="text-sm font-bold text-white">{agent.name}</h3>
+              </div>
+              <p className="text-[13px] text-white/50 leading-relaxed mb-4 flex-1">{agent.func}</p>
+              <div className="space-y-2 pt-3 border-t border-white/5">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] text-white/30 uppercase">{lang === "pt" ? "Cliente-alvo" : "Target"}</span>
+                  <span className="text-[11px] text-white/60 font-medium">{agent.target}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] text-white/30 uppercase">{lang === "pt" ? "Modelo" : "Model"}</span>
+                  <span className="text-[10px] px-2 py-0.5 font-mono" style={{ background: `${agent.color}14`, color: agent.color }}>{agent.model}</span>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* CTA */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={isInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, delay: 0.5 }} className="mt-[2px] bg-[#A100FF]/5 border border-[#A100FF]/20 p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div>
+            <h3 className="text-base font-bold text-white">{lang === "pt" ? "Precisa de um agente personalizado?" : "Need a custom agent?"}</h3>
+            <p className="text-sm text-white/40 mt-1">{lang === "pt" ? "Criamos agentes sob medida para o seu setor e processos espec\u00edficos." : "We create custom agents for your sector and specific processes."}</p>
+          </div>
+          <Link href="/agendar" className="shrink-0 inline-flex items-center gap-2 px-6 py-3 bg-[#A100FF] text-white font-semibold text-sm hover:bg-[#8800DD] transition-colors">
+            {lang === "pt" ? "Falar com especialista" : "Talk to specialist"} <ArrowRight className="w-4 h-4" />
+          </Link>
+        </motion.div>
       </div>
     </section>
   );
